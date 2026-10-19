@@ -1,0 +1,23 @@
+# Entorno y secretos
+.env
+.env.*
+*.db
+*.sqlite
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+# Node
+node_modules/
+dist/
+# Enunciado original y datos fuente (NFR-010)
+*.pdf
+Disruption Companion.pdf
+datos_fuente/
+# Sistema
+.DS_Store
+Thumbs.db

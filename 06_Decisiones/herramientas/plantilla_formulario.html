@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formulario de decisiones</title>
+<style>
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --text:#1b2330; --muted:#566274; --border:#d6dce5;
+  --accent:#1f5fbf; --accent-bg:#e7effc; --ok:#176b40; --ok-bg:#e3f4ea; --warn:#8f5200; --warn-bg:#fff1dc;
+  --ext:#6d2a7c; --ext-bg:#f4e8f7; --danger:#a8261f; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#12161c; --surface:#1a2029; --text:#e6eaf0; --muted:#9aa6b8; --border:#2c3544;
+    --accent:#7db0ff; --accent-bg:#1c2a42; --ok:#6fd49b; --ok-bg:#16301f; --warn:#f0b35a; --warn-bg:#352612;
+    --ext:#d9a2e8; --ext-bg:#2e1d35; --danger:#ff8f86;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1240px;margin:0 auto;padding:0 16px 64px}
+header.top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px}
+header.top .row{max-width:1240px;margin:0 auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+h1{font-size:18px;margin:0;flex:1 1 280px}
+.sub{color:var(--muted);font-size:13px}
+.bar{height:8px;background:var(--border);border-radius:99px;overflow:hidden;flex:1 1 200px;min-width:160px}
+.bar>i{display:block;height:100%;background:var(--ok);width:0}
+button,select,input[type=text],textarea{font:inherit;color:inherit}
+button{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+button.primary:hover{filter:brightness(1.08)}
+select{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 8px}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:20px;margin-top:16px}
+nav.side{position:sticky;top:84px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;font-size:13px}
+nav.side h3{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:14px 0 4px}
+nav.side a{display:flex;gap:6px;align-items:center;padding:3px 6px;border-radius:6px;color:var(--text);text-decoration:none}
+nav.side a:hover{background:var(--accent-bg)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--border);flex:none}
+.dot.done{background:var(--ok)} .dot.pos{background:var(--warn)}
+.intro{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.intro ul{margin:6px 0 0 18px;padding:0}
+h2.grp{font-size:16px;margin:26px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--border)}
+h2.grp.ext{border-color:var(--ext);color:var(--ext)}
+details.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin:10px 0}
+details.card[data-tipo=EXTERNA]{border-left:4px solid var(--ext)}
+details.card>summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary:before{content:"▸";color:var(--muted)}
+details.card[open]>summary:before{content:"▾"}
+.id{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.ttl{font-weight:600;flex:1 1 280px}
+.pill{font-size:12px;border-radius:99px;padding:2px 9px;border:1px solid var(--border);color:var(--muted);white-space:nowrap}
+.pill.ext{background:var(--ext-bg);color:var(--ext);border-color:transparent;font-weight:600}
+.pill.int{background:var(--accent-bg);color:var(--accent);border-color:transparent}
+.pill.done{background:var(--ok-bg);color:var(--ok);border-color:transparent;font-weight:600}
+.pill.pos{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+.body{padding:2px 16px 16px;border-top:1px solid var(--border)}
+.q{font-weight:600;margin:12px 0 6px}
+.ctx{color:var(--muted);margin:0 0 10px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 10px}
+.chip{font-family:var(--mono);font-size:11.5px;border:1px solid var(--border);border-radius:6px;padding:1px 6px;background:var(--bg);cursor:help}
+.chip.req{border-color:var(--accent)} .chip.pol{border-color:var(--ext);color:var(--ext)} .chip.gap{border-color:var(--warn);color:var(--warn)}
+.refs{background:var(--ext-bg);border-radius:10px;padding:8px 12px;margin:8px 0 12px;font-size:13.5px}
+.refs b{color:var(--ext)}
+.refs ul{margin:6px 0 0 18px;padding:0}
+.refs code{font-family:var(--mono);font-size:12px}
+.opts{display:grid;gap:8px;margin:8px 0}
+label.opt{display:flex;gap:10px;border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;background:var(--bg)}
+label.opt:hover{border-color:var(--accent)}
+label.opt.sel{border-color:var(--accent);background:var(--accent-bg)}
+label.opt input{margin-top:4px;flex:none}
+.ot{font-weight:600}
+.star{color:var(--ok);font-weight:700;font-size:12px;margin-left:6px}
+.ex{font-size:12px;color:var(--ext);font-weight:600;margin-left:6px}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;font-size:13px}
+.pc div{color:var(--muted)} .pc b{color:var(--text)}
+@media (max-width:760px){.pc{grid-template-columns:1fr}}
+.rec{background:var(--ok-bg);color:var(--text);border-radius:10px;padding:8px 12px;margin:8px 0;font-size:14px}
+.rec b{color:var(--ok)}
+.efecto{border-left:3px solid var(--accent);padding:2px 10px;margin:8px 0;font-size:14px;color:var(--muted)}
+textarea,input[type=text].otra{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px;background:var(--bg);margin-top:6px}
+textarea{min-height:70px;resize:vertical}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.export{background:var(--surface);border:2px solid var(--accent);border-radius:14px;padding:16px;margin-top:28px}
+.warn{background:var(--warn-bg);color:var(--text);border-radius:8px;padding:8px 12px;margin:8px 0;font-size:14px}
+#salida{width:100%;min-height:260px;font-family:var(--mono);font-size:12.5px}
+.muted{color:var(--muted)}
+@media (max-width:960px){.layout{grid-template-columns:1fr} nav.side{display:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="row">
+    <h1>Formulario de decisiones <span class="sub">· Caso A «Disruption Companion»</span></h1>
+    <div class="bar" title="Avance"><i id="barfill"></i></div>
+    <span id="prog" class="sub"></span>
+    <select id="filtro" aria-label="Filtrar decisiones">
+      <option value="todas">Todas</option>
+      <option value="pend">Pendientes</option>
+      <option value="ext">Revisión estricta (externas)</option>
+      <option value="otra">Con «otra» decisión</option>
+    </select>
+    <button id="btnExp">Expandir todo</button>
+    <button class="primary" id="btnFin">Generar documento final ↓</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="layout">
+    <nav class="side" id="nav" aria-label="Índice de decisiones"></nav>
+    <main id="main">
+      <div class="intro">
+        <b>Cómo usar este formulario</b>
+        <ul>
+          <li>Cada tarjeta es una decisión. Lee el contexto, las opciones y la <b>recomendación</b>; elige una opción (o escribe la tuya) y anota condiciones o comentarios.</li>
+          <li>Las tarjetas con borde morado son <b>EXTERNAS</b>: usan información que <b>no está en el PDF</b> (políticas de la aerolínea / normas por país). Requieren tu <b>revisión estricta</b>; cada una lista las referencias y el archivo donde está el detalle.</li>
+          <li>Pasa el cursor sobre un código (<span class="chip">REQ-F-02</span>, <span class="chip">DAT-15</span>…) para ver de qué trata.</li>
+          <li>Tus respuestas se guardan solas en este navegador. También puedes descargar un borrador (.json) y volver a cargarlo.</li>
+          <li>Al final, el botón <b>«Generar documento final»</b> produce el documento de trabajo (Markdown) con tus decisiones y su relación con el documento de requerimientos.</li>
+        </ul>
+        <p class="sub" style="margin:8px 0 0">Recomiendo decidir primero <b>DEC-35</b> (cómo se incorporan las políticas externas): enmarca las demás del grupo E.</p>
+      </div>
+      <div id="lista"></div>
+
+      <section class="export" id="exportar">
+        <h2 style="margin:0 0 6px;font-size:17px">Documento de trabajo final</h2>
+        <p class="muted" style="margin:0 0 10px">Reúne cada decisión, tu elección, tus notas, los insumos externos usados y la matriz requerimiento → decisiones.</p>
+        <div id="avisoPend"></div>
+        <div class="acts">
+          <button class="primary" id="btnGen">Generar y descargar documento (.md)</button>
+          <button id="btnCopiar">Copiar al portapapeles</button>
+          <button id="btnBorrador">Descargar borrador (.json)</button>
+          <label class="muted" style="display:inline-flex;gap:6px;align-items:center">Cargar borrador <input type="file" id="fileBorrador" accept="application/json,.json"></label>
+          <button id="btnReset">Borrar todas mis respuestas</button>
+        </div>
+        <p id="msg" class="muted" role="status"></p>
+        <textarea id="salida" readonly placeholder="Aquí aparecerá la vista previa del documento…"></textarea>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script type="application/json" id="data">__DATA_JSON__</script>
+
+<script id="logic">
+// ───────── Lógica pura (sin DOM): se prueba con Node ─────────
+function otherLabel(){ return "Otra decisión (descrita en las notas)"; }
+function posLabel(){ return "Posponer: necesito más información"; }
+
+function optionText(d, id){
+  if (id === "_otra") return otherLabel();
+  if (id === "_pos") return posLabel();
+  var o = d.opciones.find(function(x){ return x.id === id; });
+  return o ? (id + ") " + o.titulo) : id;
+}
+function getAns(answers, id){ return answers[id] || {sel: [], notas: ""}; }
+function isDecided(d, a){
+  if (!a || !a.sel || a.sel.length === 0) return false;
+  var real = a.sel.filter(function(x){ return x !== "_pos"; });
+  if (real.length === 0) return false;
+  if (real.indexOf("_otra") >= 0 && !(a.notas && a.notas.trim())) return false;
+  return true;
+}
+function sameSet(a, b){
+  var x = a.slice().sort().join("|"), y = b.slice().sort().join("|");
+  return x === y;
+}
+function followsRec(d, a){
+  if (!isDecided(d, a)) return null;
+  return sameSet(a.sel, d.rec);
+}
+function usesExternal(d, a){
+  if (!isDecided(d, a)) return null;
+  return a.sel.some(function(id){
+    var o = d.opciones.find(function(x){ return x.id === id; });
+    return o ? !!o.externas : false;
+  });
+}
+function esc(s){ return String(s == null ? "" : s).replace(/\|/g, "\\|").replace(/\r?\n/g, " "); }
+
+function buildDoc(DATA, answers, nowText){
+  var D = DATA.decisiones.slice().sort(function(a, b){
+    if (a.grupo !== b.grupo) return a.grupo < b.grupo ? -1 : 1;
+    return a.orden - b.orden;
+  });
+  var total = D.length;
+  var decided = D.filter(function(d){ return isDecided(d, getAns(answers, d.id)); });
+  var pend = D.filter(function(d){ return !isDecided(d, getAns(answers, d.id)); });
+  var L = [];
+  L.push("# Documento de trabajo final — Decisiones del Caso A «Disruption Companion»");
+  L.push("");
+  L.push("> Generado: " + nowText + " · Catálogo de decisiones v" + DATA.version + " · **" + decided.length + " de " + total + " decididas** · " + pend.length + " pendientes.");
+  L.push("> Este documento relaciona **cada decisión de trabajo** con el **documento de requerimientos** (`03_Requerimientos/REQUERIMIENTOS.md`). Lo escrito aquí por ti reemplaza cualquier recomendación del análisis.");
+  L.push("");
+  L.push("## 1. Resumen");
+  L.push("");
+  L.push("| ID | Decisión | Tipo | Tu elección | ¿Sigue la recomendación? | ¿Incorpora info externa? |");
+  L.push("|---|---|---|---|---|---|");
+  D.forEach(function(d){
+    var a = getAns(answers, d.id), ok = isDecided(d, a);
+    var elec = ok ? a.sel.filter(function(x){ return x !== "_pos"; }).map(function(x){ return x === "_otra" ? "Otra" : x; }).join(", ") : "**PENDIENTE**";
+    var f = followsRec(d, a), u = usesExternal(d, a);
+    L.push("| " + d.id + " | " + esc(d.titulo) + " | " + (d.tipo === "EXTERNA" ? "EXTERNA (revisión estricta)" : "Interna") + " | " + elec + " | " + (f === null ? "—" : (f ? "Sí" : "**No**")) + " | " + (u === null ? "—" : (u ? "**Sí**" : "No")) + " |");
+  });
+  L.push("");
+  if (pend.length){
+    L.push("**Pendientes:** " + pend.map(function(d){ return d.id; }).join(", ") + ". Mientras no se decidan, **ninguna recomendación del análisis se considera aprobada**.");
+    L.push("");
+  }
+
+  L.push("## 2. Decisiones de trabajo (detalle)");
+  L.push("");
+  var grupoActual = null;
+  D.forEach(function(d){
+    if (d.grupo !== grupoActual){ grupoActual = d.grupo; L.push("### " + DATA.grupos[d.grupo]); L.push(""); }
+    var a = getAns(answers, d.id), ok = isDecided(d, a);
+    L.push("#### " + d.id + " · " + d.titulo + (d.tipo === "EXTERNA" ? "  ·  EXTERNA — revisión estricta" : ""));
+    L.push("");
+    L.push("- **Pregunta:** " + d.pregunta);
+    if (ok){
+      L.push("- **Tu elección:** " + a.sel.filter(function(x){ return x !== "_pos"; }).map(function(x){ return optionText(d, x); }).join(" · "));
+      a.sel.forEach(function(x){
+        var o = d.opciones.find(function(y){ return y.id === x; });
+        if (o){ L.push("  - *" + x + ")* " + o.detalle); }
+      });
+    } else {
+      L.push("- **Tu elección:** **PENDIENTE**" + ((a.sel && a.sel.indexOf("_pos") >= 0) ? " (pospuesta: necesitas más información)" : ""));
+    }
+    L.push("- **Recomendación del análisis:** " + d.rec.map(function(x){ return optionText(d, x); }).join(" · ") + " — " + d.razon);
+    var f = followsRec(d, a);
+    if (f !== null){ L.push("- **¿Coincide con la recomendación?** " + (f ? "Sí." : "**No**: elegiste distinto.")); }
+    if (a.notas && a.notas.trim()){ L.push("- **Tus notas / condiciones:** " + a.notas.trim().replace(/\r?\n/g, "\n  ")); }
+    L.push("- **Efecto sobre los requerimientos:** " + d.efecto);
+    var reqs = d.traz.req || [];
+    if (reqs.length){
+      L.push("- **Requerimientos relacionados:**");
+      reqs.forEach(function(r){ L.push("  - `" + r + "` — " + (DATA.dic.req[r] || "(ver REQUERIMIENTOS.md)")); });
+    }
+    var T = [];
+    ["src","amb","gap","dat","pol"].forEach(function(k){ if (d.traz[k] && d.traz[k].length) T.push(k.toUpperCase() + ": " + d.traz[k].join(", ")); });
+    if (T.length){ L.push("- **Trazabilidad:** " + T.join(" · ")); }
+    if (d.referencias && d.referencias.length){
+      L.push("- **Insumos externos para esta decisión (para tu revisión):**");
+      d.referencias.forEach(function(r){ L.push("  - `" + r.etiqueta + "` → `" + r.archivo + "` — " + r.resumen); });
+      var u = usesExternal(d, a);
+      if (u !== null){ L.push("- **Tu elección ¿incorpora información externa al diseño?** " + (u ? "**Sí** — autorizaste usar los insumos externos listados." : "No — los insumos externos quedan solo como contexto.")); }
+    }
+    L.push("");
+  });
+
+  L.push("## 3. Matriz requerimiento → decisiones");
+  L.push("");
+  L.push("Para cada requerimiento afectado: qué decisiones lo modifican o precisan y cómo quedaron.");
+  L.push("");
+  var byReq = {};
+  D.forEach(function(d){ (d.traz.req || []).forEach(function(r){ (byReq[r] = byReq[r] || []).push(d); }); });
+  var reqIds = Object.keys(byReq).sort(function(a, b){
+    var pa = a.split("-"), pb = b.split("-");
+    if (pa[1] !== pb[1]) return pa[1] < pb[1] ? -1 : 1;
+    return parseInt(pa[2], 10) - parseInt(pb[2], 10);
+  });
+  L.push("| Requerimiento | Texto | Decisiones que lo afectan (elección) |");
+  L.push("|---|---|---|");
+  reqIds.forEach(function(r){
+    var cell = byReq[r].map(function(d){
+      var a = getAns(answers, d.id), ok = isDecided(d, a);
+      return d.id + " (" + (ok ? a.sel.filter(function(x){ return x !== "_pos"; }).map(function(x){ return x === "_otra" ? "otra" : x; }).join("+") : "pendiente") + ")";
+    }).join("; ");
+    var txt = DATA.dic.req[r] || "";
+    if (txt.length > 140) txt = txt.slice(0, 137) + "…";
+    L.push("| `" + r + "` | " + esc(txt) + " | " + cell + " |");
+  });
+  L.push("");
+
+  L.push("## 4. Insumos externos: autorizados y no autorizados");
+  L.push("");
+  var aut = [], noaut = [], sin = [];
+  D.filter(function(d){ return d.tipo === "EXTERNA"; }).forEach(function(d){
+    var a = getAns(answers, d.id), u = usesExternal(d, a);
+    if (u === null) sin.push(d); else if (u) aut.push(d); else noaut.push(d);
+  });
+  L.push("**Autorizados a incorporarse al diseño (tu elección los usa):** " + (aut.length ? aut.map(function(d){ return d.id; }).join(", ") : "ninguno") + ".");
+  L.push("");
+  L.push("**Solo contexto (no se incorporan):** " + (noaut.length ? noaut.map(function(d){ return d.id; }).join(", ") : "ninguno") + ".");
+  L.push("");
+  L.push("**Sin decidir:** " + (sin.length ? sin.map(function(d){ return d.id; }).join(", ") : "ninguno") + ".");
+  L.push("");
+  if (aut.length){
+    L.push("Detalle de lo autorizado:");
+    aut.forEach(function(d){
+      L.push("- **" + d.id + "** — " + d.titulo + ": " + (d.referencias || []).map(function(r){ return "`" + r.etiqueta + "`"; }).join(", "));
+    });
+    L.push("");
+  }
+
+  L.push("## 5. Cambios a incorporar en el documento de requerimientos");
+  L.push("");
+  L.push("Lista de verificación derivada de tus decisiones (marca cada una al actualizar `REQUERIMIENTOS.md`):");
+  L.push("");
+  D.forEach(function(d){
+    var a = getAns(answers, d.id);
+    if (!isDecided(d, a)) return;
+    var el = a.sel.filter(function(x){ return x !== "_pos"; }).map(function(x){ return x === "_otra" ? "otra" : x; }).join("+");
+    L.push("- [ ] **" + d.id + " → " + el + "**: " + d.efecto);
+  });
+  L.push("");
+
+  L.push("## 6. Supuestos pendientes y preguntas abiertas");
+  L.push("");
+  if (!pend.length){ L.push("No hay decisiones pendientes."); }
+  pend.forEach(function(d){
+    L.push("- **" + d.id + "** — " + d.titulo + ". Recomendación del análisis (**no aprobada**): " + d.rec.map(function(x){ return optionText(d, x); }).join(" · ") + ".");
+  });
+  L.push("");
+  L.push("## Anexo · Archivos de referencia");
+  L.push("");
+  L.push("- Fuente indexada: `01_Fuente_y_Trazabilidad/01_Indice_de_fuente_SRC.md`");
+  L.push("- Requerimientos: `03_Requerimientos/REQUERIMIENTOS.md`");
+  L.push("- Análisis de datos: `04_Analisis_de_Datos/`");
+  L.push("- Políticas externas: `05_Politicas_Externas/` (matriz comparativa en `15_Matriz_comparativa.md`; cruces en `16_Referencias_cruzadas.md`)");
+  L.push("- Catálogo legible de decisiones: `06_Decisiones/DECISIONES_CATALOGO.md`");
+  return L.join("\n");
+}
+</script>
+
+<script id="ui">
+(function(){
+  var DATA = JSON.parse(document.getElementById("data").textContent);
+  var KEY = "dec_form_v" + DATA.version;
+  var mem = {};
+  function store(k, v){ try { localStorage.setItem(k, v); } catch(e){ mem[k] = v; } }
+  function load(k){ try { var v = localStorage.getItem(k); return v == null ? (mem[k] || null) : v; } catch(e){ return mem[k] || null; } }
+  var answers = {};
+  try { answers = JSON.parse(load(KEY) || "{}") || {}; } catch(e){ answers = {}; }
+  function save(){ store(KEY, JSON.stringify(answers)); }
+
+  var D = DATA.decisiones.slice().sort(function(a, b){
+    if (a.grupo !== b.grupo) return a.grupo < b.grupo ? -1 : 1;
+    return a.orden - b.orden;
+  });
+  var $ = function(id){ return document.getElementById(id); };
+  function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  function chip(kind, id){
+    var c = el("span", "chip " + kind, id);
+    var dic = DATA.dic[kind] || {};
+    var t = dic[id];
+    if (!t && kind === "pol"){ t = "Política externa: ver 05_Politicas_Externas/"; }
+    if (t) c.title = id + " — " + t;
+    return c;
+  }
+
+  var cards = {};
+  function render(){
+    var lista = $("lista"), nav = $("nav");
+    lista.textContent = ""; nav.textContent = "";
+    var g = null, navG = null;
+    D.forEach(function(d){
+      if (d.grupo !== g){
+        g = d.grupo;
+        var h = el("h2", "grp" + (g === "E" ? " ext" : ""), DATA.grupos[g]); h.id = "g-" + g;
+        lista.appendChild(h);
+        navG = el("h3", null, DATA.grupos[g].split(" · ")[0] + " · " + DATA.grupos[g].split(" · ")[1].split(" (")[0]);
+        nav.appendChild(navG);
+      }
+      var a = nav.appendChild(el("a")); a.href = "#" + d.id; a.dataset.id = d.id;
+      a.appendChild(el("span", "dot")); a.appendChild(document.createTextNode(d.id + " " + d.titulo.slice(0, 28) + (d.titulo.length > 28 ? "…" : "")));
+      a.addEventListener("click", function(){ var c = cards[d.id]; if (c) c.open = true; });
+      lista.appendChild(buildCard(d));
+    });
+    refresh();
+  }
+
+  function buildCard(d){
+    var det = el("details", "card"); det.id = d.id; det.dataset.tipo = d.tipo; cards[d.id] = det;
+    var sm = el("summary");
+    sm.appendChild(el("span", "id", d.id));
+    sm.appendChild(el("span", "ttl", d.titulo));
+    sm.appendChild(el("span", "pill " + (d.tipo === "EXTERNA" ? "ext" : "int"), d.tipo === "EXTERNA" ? "EXTERNA · revisión estricta" : "Interna"));
+    var st = el("span", "pill", "Pendiente"); st.dataset.st = d.id; sm.appendChild(st);
+    det.appendChild(sm);
+
+    var b = el("div", "body");
+    b.appendChild(el("p", "q", d.pregunta));
+    b.appendChild(el("p", "ctx", d.contexto));
+    var ch = el("div", "chips");
+    var map = {src: "src", req: "req", amb: "amb", gap: "gap", dat: "dat", pol: "pol"};
+    Object.keys(map).forEach(function(k){ (d.traz[k] || []).forEach(function(id){ ch.appendChild(chip(map[k], id)); }); });
+    b.appendChild(ch);
+
+    if (d.referencias && d.referencias.length){
+      var rf = el("div", "refs");
+      var bb = el("b", null, "Información externa al PDF — para tu revisión estricta");
+      rf.appendChild(bb);
+      var ul = el("ul");
+      d.referencias.forEach(function(r){
+        var li = el("li");
+        li.appendChild(el("code", null, r.etiqueta));
+        li.appendChild(document.createTextNode(" — " + r.resumen + " "));
+        var f = el("code", null, "[" + r.archivo + "]");
+        li.appendChild(f);
+        ul.appendChild(li);
+      });
+      rf.appendChild(ul);
+      b.appendChild(rf);
+    }
+
+    var opts = el("div", "opts");
+    var all = d.opciones.concat([
+      {id: "_otra", titulo: "Otra decisión (descríbela en las notas)", detalle: "", pros: "", contras: ""},
+      {id: "_pos", titulo: "Posponer: necesito más información", detalle: "", pros: "", contras: ""}
+    ]);
+    all.forEach(function(o){
+      var lb = el("label", "opt"); lb.dataset.o = o.id;
+      var inp = el("input"); inp.type = d.multiple ? "checkbox" : "radio"; inp.name = "r-" + d.id; inp.value = o.id;
+      inp.addEventListener("change", function(){ onPick(d, o.id, inp.checked); });
+      lb.appendChild(inp);
+      var box = el("div");
+      var t = el("div", "ot", (o.id.charAt(0) === "_" ? "" : o.id + ") ") + o.titulo);
+      if (d.rec.indexOf(o.id) >= 0){ t.appendChild(el("span", "star", "★ recomendada")); }
+      if (o.externas){ t.appendChild(el("span", "ex", "usa información externa")); }
+      box.appendChild(t);
+      if (o.detalle){ box.appendChild(el("div", "muted", o.detalle)); }
+      if (o.pros || o.contras){
+        var pc = el("div", "pc");
+        var p = el("div"); p.appendChild(el("b", null, "A favor: ")); p.appendChild(document.createTextNode(o.pros || "—"));
+        var c = el("div"); c.appendChild(el("b", null, "En contra: ")); c.appendChild(document.createTextNode(o.contras || "—"));
+        pc.appendChild(p); pc.appendChild(c); box.appendChild(pc);
+      }
+      lb.appendChild(box); opts.appendChild(lb);
+    });
+    b.appendChild(opts);
+
+    var rec = el("div", "rec");
+    rec.appendChild(el("b", null, "Recomendación del análisis: "));
+    rec.appendChild(document.createTextNode(d.rec.map(function(x){ return optionText(d, x); }).join(" · ") + ". " + d.razon));
+    b.appendChild(rec);
+    var ef = el("div", "efecto"); ef.appendChild(el("b", null, "Efecto en los requerimientos: ")); ef.appendChild(document.createTextNode(d.efecto)); b.appendChild(ef);
+
+    var ta = el("textarea"); ta.placeholder = "Tu decisión, condiciones o comentarios (obligatorio si eliges «Otra»)…"; ta.dataset.n = d.id;
+    ta.addEventListener("input", function(){ var a = answers[d.id] = answers[d.id] || {sel: [], notas: ""}; a.notas = ta.value; save(); refresh(); });
+    b.appendChild(ta);
+
+    var ac = el("div", "acts");
+    var b1 = el("button", null, "Aceptar la recomendación");
+    b1.addEventListener("click", function(){ answers[d.id] = answers[d.id] || {sel: [], notas: ""}; answers[d.id].sel = d.rec.slice(); save(); sync(d.id); refresh(); });
+    var b2 = el("button", null, "Limpiar");
+    b2.addEventListener("click", function(){ delete answers[d.id]; save(); sync(d.id); refresh(); });
+    ac.appendChild(b1); ac.appendChild(b2); b.appendChild(ac);
+    det.appendChild(b);
+    return det;
+  }
+
+  function onPick(d, id, checked){
+    var a = answers[d.id] = answers[d.id] || {sel: [], notas: ""};
+    if (d.multiple){
+      var i = a.sel.indexOf(id);
+      if (checked && i < 0) a.sel.push(id);
+      if (!checked && i >= 0) a.sel.splice(i, 1);
+    } else {
+      a.sel = checked ? [id] : [];
+    }
+    save(); sync(d.id); refresh();
+  }
+
+  function sync(id){
+    var det = cards[id]; if (!det) return;
+    var a = answers[id] || {sel: [], notas: ""};
+    det.querySelectorAll("label.opt").forEach(function(lb){
+      var on = a.sel.indexOf(lb.dataset.o) >= 0;
+      lb.classList.toggle("sel", on);
+      lb.querySelector("input").checked = on;
+    });
+    var ta = det.querySelector("textarea"); if (ta.value !== (a.notas || "")) ta.value = a.notas || "";
+  }
+
+  function stateOf(d){
+    var a = getAns(answers, d.id);
+    if (isDecided(d, a)) return "done";
+    if (a.sel && a.sel.indexOf("_pos") >= 0) return "pos";
+    return "pend";
+  }
+
+  function refresh(){
+    var done = 0;
+    D.forEach(function(d){
+      var s = stateOf(d); if (s === "done") done++;
+      var st = document.querySelector('[data-st="' + d.id + '"]');
+      var a = getAns(answers, d.id);
+      if (st){
+        st.className = "pill " + (s === "done" ? "done" : s === "pos" ? "pos" : "");
+        st.textContent = s === "done" ? "Decidida: " + a.sel.filter(function(x){ return x !== "_pos"; }).map(function(x){ return x === "_otra" ? "otra" : x; }).join(", ") : s === "pos" ? "Pospuesta" : "Pendiente";
+      }
+      var dot = document.querySelector('#nav a[data-id="' + d.id + '"] .dot');
+      if (dot) dot.className = "dot " + (s === "done" ? "done" : s === "pos" ? "pos" : "");
+    });
+    $("prog").textContent = done + " de " + D.length + " decididas";
+    $("barfill").style.width = (100 * done / D.length) + "%";
+    applyFilter();
+    var pend = D.filter(function(d){ return stateOf(d) !== "done"; });
+    $("avisoPend").textContent = "";
+    if (pend.length){
+      var w = el("div", "warn", "Faltan " + pend.length + " decisiones: " + pend.map(function(d){ return d.id; }).join(", ") + ". Puedes generar el documento igualmente; las pendientes quedarán marcadas y sin aprobar.");
+      $("avisoPend").appendChild(w);
+    }
+  }
+
+  function applyFilter(){
+    var f = $("filtro").value;
+    D.forEach(function(d){
+      var s = stateOf(d), a = getAns(answers, d.id), show = true;
+      if (f === "pend") show = s !== "done";
+      if (f === "ext") show = d.tipo === "EXTERNA";
+      if (f === "otra") show = (a.sel || []).indexOf("_otra") >= 0;
+      cards[d.id].style.display = show ? "" : "none";
+    });
+  }
+
+  function nowText(){ var n = new Date(); return n.toLocaleString("es-CL"); }
+  function download(name, text, mime){
+    var blob = new Blob([text], {type: mime || "text/plain;charset=utf-8"});
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function generar(){
+    var md = buildDoc(DATA, answers, nowText());
+    $("salida").value = md;
+    download("DOCUMENTO_DE_TRABAJO_DECISIONES.md", md, "text/markdown;charset=utf-8");
+    $("msg").textContent = "Documento generado (" + md.length + " caracteres). Si no se descargó, copia el contenido de la vista previa.";
+    $("salida").scrollIntoView({behavior: "smooth", block: "nearest"});
+  }
+
+  $("btnFin").addEventListener("click", function(){ $("exportar").scrollIntoView({behavior: "smooth"}); });
+  $("btnGen").addEventListener("click", generar);
+  $("btnCopiar").addEventListener("click", function(){
+    var md = buildDoc(DATA, answers, nowText()); $("salida").value = md;
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(md).then(function(){ $("msg").textContent = "Copiado al portapapeles."; }, function(){ $("salida").select(); $("msg").textContent = "Selecciona y copia desde la vista previa."; });
+    } else { $("salida").select(); $("msg").textContent = "Selecciona y copia desde la vista previa."; }
+  });
+  $("btnBorrador").addEventListener("click", function(){ download("borrador_decisiones.json", JSON.stringify({version: DATA.version, answers: answers}, null, 2), "application/json"); });
+  $("fileBorrador").addEventListener("change", function(ev){
+    var f = ev.target.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function(){
+      try { var o = JSON.parse(r.result); answers = o.answers || {}; save(); D.forEach(function(d){ sync(d.id); }); refresh(); $("msg").textContent = "Borrador cargado."; }
+      catch(e){ $("msg").textContent = "No se pudo leer el borrador."; }
+    };
+    r.readAsText(f);
+  });
+  $("btnReset").addEventListener("click", function(){
+    if (!window.confirm("¿Borrar todas tus respuestas de este navegador?")) return;
+    answers = {}; save(); D.forEach(function(d){ sync(d.id); }); refresh();
+  });
+  $("filtro").addEventListener("change", applyFilter);
+  var abierto = false;
+  $("btnExp").addEventListener("click", function(){
+    abierto = !abierto;
+    D.forEach(function(d){ cards[d.id].open = abierto; });
+    $("btnExp").textContent = abierto ? "Contraer todo" : "Expandir todo";
+  });
+
+  render();
+  D.forEach(function(d){ sync(d.id); });
+  refresh();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,3025 @@
+{
+ "version": "1.0",
+ "grupos": {
+  "A": "A · Alcance y enfoque del ejercicio",
+  "B": "B · Interpretación del caso y de los datos",
+  "C": "C · Autonomía, intervención humana y acciones",
+  "D": "D · Datos, seguridad y operación",
+  "E": "E · Políticas externas (REVISIÓN ESTRICTA)",
+  "F": "F · Presentación y uso de IA"
+ },
+ "decisiones": [
+  {
+   "id": "DEC-01",
+   "grupo": "A",
+   "titulo": "Track a implementar",
+   "tipo": "INTERNA",
+   "pregunta": "¿Implementas el track Backend/Integración o el track Frontend/Experience? (el otro queda como diseño)",
+   "contexto": "El PDF exige profundidad en uno solo y diseño del otro (SRC-04-17, SRC-04-20). El caso base es sobre todo lógica de decisión (reserva + eventos + políticas) con varias trampas en los datos; las dimensiones de evaluación 'Fundamentos de ingeniería' y 'Razonamiento agentic y control' se demuestran mejor con contratos, errores e idempotencia.",
+   "traz": {
+    "src": [
+     "SRC-04-17",
+     "SRC-04-18",
+     "SRC-04-19",
+     "SRC-04-20",
+     "SRC-05-02",
+     "SRC-07-02",
+     "SRC-07-07"
+    ],
+    "req": [
+     "REQ-F-07",
+     "REQ-F-08",
+     "REQ-F-09",
+     "REQ-D-02"
+    ],
+    "amb": [],
+    "gap": [],
+    "dat": [],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Backend/Integración",
+     "detalle": "Servicio o función que combina reserva, eventos y política, con manejo de errores y al menos un test. La experiencia del pasajero queda como especificación del mensaje.",
+     "pros": "Ejercita contratos, errores, idempotencia, calidad de datos; evidencia verificable por tests; encaja con 'control' y 'agentic'.",
+     "contras": "La experiencia visible del pasajero queda solo como diseño.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Frontend/Experience",
+     "detalle": "Pantalla o flujo que consume datos equivalentes y muestra estado del viaje, alerta y recomendación, con una validación.",
+     "pros": "Resultado visible y fácil de mostrar en 10 minutos.",
+     "contras": "Riesgo de esconder la lógica de decisión (donde están las trampas); consume datos simulados; la capa backend queda como supuesto.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "El valor del ejercicio está en la lógica de decisión y en cómo se tratan los datos defectuosos; eso es backend. La pantalla se puede especificar sin implementarla.",
+   "efecto": "Define cuál de REQ-F-07 o REQ-F-08 se cumple y qué debe especificarse en REQ-F-09. Cambia el contenido de REQ-D-02.",
+   "multiple": false,
+   "orden": 1
+  },
+  {
+   "id": "DEC-02",
+   "grupo": "A",
+   "titulo": "Rol de la IA en tiempo de ejecución",
+   "tipo": "INTERNA",
+   "pregunta": "¿Se usa IA dentro del producto (runtime)? Si sí, ¿para qué? Si no, ¿cómo lo justificas?",
+   "contexto": "No es obligatorio usar IA en runtime y resolver de forma determinística 'puede ser una excelente decisión' (SRC-05-01). Aun así hay que diseñar cómo se manejaría una consulta ambigua y dónde intervendría IA o un agente (SRC-04-22).",
+   "traz": {
+    "src": [
+     "SRC-05-01",
+     "SRC-06-05",
+     "SRC-04-09",
+     "SRC-07-07",
+     "SRC-04-22"
+    ],
+    "req": [
+     "REQ-F-06",
+     "REQ-F-10",
+     "REQ-N-06",
+     "REQ-D-09"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-22",
+     "GAP-24"
+    ],
+    "dat": [
+     "DAT-65",
+     "DAT-79"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Sin IA en runtime (determinístico + plantillas validadas)",
+     "detalle": "La decisión y los mensajes se generan con reglas y plantillas. La IA aparece solo como diseño para la consulta libre.",
+     "pros": "Máxima exactitud y trazabilidad; costo y latencia nulos; sin riesgo de PII hacia un modelo; fácil de operar por un equipo pequeño.",
+     "contras": "Mensajes menos naturales; la consulta libre ambigua solo queda como diseño.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "IA solo para redactar el mensaje",
+     "detalle": "Un modelo parafrasea un mensaje construido con hechos ya validados; un validador determinístico revisa el resultado.",
+     "pros": "Mejor experiencia de lectura.",
+     "contras": "Costo y latencia por interacción; dependencia de un modelo; riesgo de alucinar; hay que validar cada salida.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "IA para entender la consulta libre",
+     "detalle": "Un modelo clasifica la intención y extrae entidades; la decisión sigue siendo determinística.",
+     "pros": "Cubre consultas ambiguas del pasajero.",
+     "contras": "Superficie de prompt injection; dependencia de modelo; necesita límites estrictos de lo que ve.",
+     "externas": false
+    },
+    {
+     "id": "d",
+     "titulo": "Agente con tools",
+     "detalle": "Un agente decide qué tools llamar y con qué argumentos.",
+     "pros": "Máxima flexibilidad.",
+     "contras": "Alto riesgo con acciones de alto impacto; difícil de auditar; choca con 'control'.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "El núcleo del slice debe ser verificable y determinístico. Se documenta b y c como capa AI-assisted opcional para la consulta ambigua (REQ-F-06), explicando por qué no se activa en v1.",
+   "efecto": "Define el contenido de REQ-F-10 (justificación) y la clasificación de pasos de REQ-D-09. Condiciona REQ-N-06 (latencia/costo) y REQ-N-04 (qué ve un modelo).",
+   "multiple": false,
+   "orden": 2
+  },
+  {
+   "id": "DEC-03",
+   "grupo": "A",
+   "titulo": "Formato de entrega y soporte de presentación",
+   "tipo": "INTERNA",
+   "pregunta": "¿En qué formato entregas los tres entregables y con qué soporte presentas los 10 minutos?",
+   "contexto": "El formato es libre y la estética no se evalúa; no se exigen diapositivas (SRC-06-02, SRC-06-03).",
+   "traz": {
+    "src": [
+     "SRC-01-05",
+     "SRC-06-02",
+     "SRC-06-03"
+    ],
+    "req": [
+     "REQ-P-09",
+     "REQ-P-06",
+     "REQ-D-11"
+    ],
+    "amb": [],
+    "gap": [],
+    "dat": [],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Repositorio + Markdown",
+     "detalle": "Código y tests, README.md (≤2 págs.), AI_NOTE.md (≤1 pág.) y una tabla de clasificación de pasos; la presentación se hace directamente sobre estos archivos.",
+     "pros": "Todo localizable y versionable; sin trabajo extra de diapositivas.",
+     "contras": "Requiere que el comité pueda abrir el repo.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Repositorio + PDFs generados",
+     "detalle": "Igual que a, pero exportando los documentos a PDF.",
+     "pros": "Fácil de enviar por correo.",
+     "contras": "Pasos extra de exportación dentro de las 3 horas.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Un documento único + demo",
+     "detalle": "Un solo documento largo y una demostración.",
+     "pros": "Narrativa continua.",
+     "contras": "Difícil respetar los límites de 2 y 1 página por entregable.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Minimiza trabajo no evaluado y maximiza evidencia localizable (SRC-07-05).",
+   "efecto": "Determina cómo se presentan REQ-D-07, REQ-D-08 y el soporte REQ-D-11.",
+   "multiple": false,
+   "orden": 3
+  },
+  {
+   "id": "DEC-04",
+   "grupo": "A",
+   "titulo": "Alcance del vertical slice",
+   "tipo": "INTERNA",
+   "pregunta": "¿Qué cubre exactamente el slice dentro de las 3 horas?",
+   "contexto": "El tiempo es un límite, no una meta (SRC-06-01). El PDF habla de 'modificación' en general (SRC-01-09) pero solo muestra un retraso. El ejemplo es un único caso (DAT-82).",
+   "traz": {
+    "src": [
+     "SRC-01-09",
+     "SRC-04-21",
+     "SRC-04-23",
+     "SRC-06-01"
+    ],
+    "req": [
+     "REQ-F-00",
+     "REQ-F-05",
+     "REQ-D-04",
+     "REQ-P-01"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-07"
+    ],
+    "dat": [
+     "DAT-18",
+     "DAT-82"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Solo el caso base",
+     "detalle": "Retraso en S1 con pérdida de conexión, menor en el grupo y las tres opciones del ejemplo.",
+     "pros": "Profundidad; cabe en 3 horas.",
+     "contras": "No demuestra el manejo de las trampas de borde.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Caso base + casos borde críticos",
+     "detalle": "Además: evento contradictorio (TC-02/03), opción sin cupos (TC-09), 503 (TC-14) y notificación sin validar (TC-16).",
+     "pros": "Demuestra criterio donde están las trampas.",
+     "contras": "Algo más de trabajo; hay que acotar.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Caso base + otros tipos de evento",
+     "detalle": "Agrega cancelación y adelanto.",
+     "pros": "Amplitud.",
+     "contras": "Obliga a inventar política y datos que el PDF no define (GAP-07).",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "b"
+   ],
+   "razon": "El ejercicio mide criterio, no volumen (SRC-01-08). Los casos borde críticos muestran control sin inventar datos.",
+   "efecto": "Fija el alcance de REQ-D-04 y la lista de pruebas de REQ-D-05; delimita REQ-F-00.",
+   "multiple": false,
+   "orden": 4
+  },
+  {
+   "id": "DEC-05",
+   "grupo": "B",
+   "titulo": "¿Qué es una «modificación relevante»? (AMB-01)",
+   "tipo": "EXTERNA",
+   "pregunta": "¿Con qué criterio el sistema decide que un evento es una modificación relevante para el pasajero?",
+   "contexto": "El PDF no lo define a propósito (SRC-04-12). En el ejemplo hay un retraso de 160 min, un cambio de puerta y dos estados. La política del PDF usa 180 min (R1), pero la aerolínea trata como derecho de cambio desde 31 min de retraso y 16 min de adelanto (información externa).",
+   "traz": {
+    "src": [
+     "SRC-04-12",
+     "SRC-01-13"
+    ],
+    "req": [
+     "REQ-F-02",
+     "REQ-F-11"
+    ],
+    "amb": [
+     "AMB-01"
+    ],
+    "gap": [
+     "GAP-02",
+     "GAP-07"
+    ],
+    "dat": [
+     "DAT-15",
+     "DAT-23"
+    ],
+    "pol": []
+   },
+   "referencias": [
+    {
+     "etiqueta": "POL-UY-01",
+     "archivo": "05_Politicas_Externas/01_Uruguay_articulos_centro_ayuda.md",
+     "resumen": "Retraso de 31 min o más y no conforme: cambio sin costo (mismo destino y cabina, 12 meses) o devolución sin cargo."
+    },
+    {
+     "etiqueta": "POL-UY-02",
+     "archivo": "05_Politicas_Externas/01_Uruguay_articulos_centro_ayuda.md",
+     "resumen": "Adelanto de 16 min o más: mismas opciones que el retraso."
+    },
+    {
+     "etiqueta": "POL-CL-03",
+     "archivo": "05_Politicas_Externas/03_Chile_conoce-tus-derechos.md",
+     "resumen": "Desde 31 min de atraso: cambio (fecha, hora o destino, misma cabina) o devolución."
+    },
+    {
+     "etiqueta": "MATRIZ",
+     "archivo": "05_Politicas_Externas/15_Matriz_comparativa.md",
+     "resumen": "Comparación por tema entre todas las fuentes y las reglas del PDF."
+    }
+   ],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Solo lo que activa una regla del PDF",
+     "detalle": "Relevante si se cumple R1, R2, R3 o R5 (o alguna regla futura).",
+     "pros": "Simple y verificable con la política devuelta por la tool.",
+     "contras": "Ignora retrasos de 31 a 179 min que la aerolínea considera relevantes.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Por impacto en el itinerario (con umbral configurable)",
+     "detalle": "Relevante si hay cancelación, retraso o adelanto sobre un umbral, conexión perdida, o cambio de aeropuerto o fecha. El cambio de puerta se informa como dato, sin tratarlo como modificación relevante.",
+     "pros": "Alineado con el objetivo del pasajero; el umbral es un parámetro.",
+     "contras": "Hay que elegir el umbral (ver DEC-26).",
+     "externas": true
+    },
+    {
+     "id": "c",
+     "titulo": "Todo evento es relevante",
+     "detalle": "Se informa cualquier evento.",
+     "pros": "Transparencia total.",
+     "contras": "Ruido y riesgo de comunicar datos no verificados; más contactos al call center.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "b"
+   ],
+   "razon": "Es la lectura más cercana a 'entienda si hubo una modificación relevante y qué implica' (SRC-01-13). El umbral queda como parámetro y su valor depende de DEC-26.",
+   "efecto": "Define el criterio de REQ-F-11 y la salida de REQ-F-02. Depende de DEC-26 y DEC-31.",
+   "multiple": false,
+   "orden": 5
+  },
+  {
+   "id": "DEC-06",
+   "grupo": "B",
+   "titulo": "Medición del retraso y llegada nueva",
+   "tipo": "INTERNA",
+   "pregunta": "¿El retraso que usan las reglas es de salida o de llegada, y cómo se obtiene la llegada nueva?",
+   "contexto": "El evento solo trae `delay_minutes` y `new_departure` (salida). No existe `new_arrival` (DAT-19). Las normas externas miden unas a la salida y otras a la llegada, pero el PDF no dice cuál usan sus reglas.",
+   "traz": {
+    "src": [
+     "SRC-03-03",
+     "SRC-02-08"
+    ],
+    "req": [
+     "REQ-F-02",
+     "REQ-F-30"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-15"
+    ],
+    "dat": [
+     "DAT-19",
+     "DAT-54",
+     "DAT-75"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Usar el retraso de salida y derivar la llegada por propagación",
+     "detalle": "Las reglas usan `delay_minutes` (salida). La llegada se deriva sumando el retraso a la llegada programada (supuesto A1) y se etiqueta como derivada.",
+     "pros": "Usa solo datos existentes; supuesto explícito.",
+     "contras": "Puede equivocarse si el retraso se recupera o crece en vuelo.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Exigir `new_arrival` a la fuente",
+     "detalle": "Sin llegada real, no se evalúa la conexión; se degrada a humano.",
+     "pros": "No hay supuestos.",
+     "contras": "Casi nunca habrá dato; sube la carga humana.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Evaluar ambos puntos de medición",
+     "detalle": "Salida para las reglas del PDF y llegada para las normas externas.",
+     "pros": "Completo.",
+     "contras": "Complejo; usa normas externas sin decidir su jurisdicción (DEC-25).",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Es el supuesto más simple y declarable; el resultado se presenta como estimación y exige confirmación antes de actuar (DEC-13).",
+   "efecto": "Define cómo se obtiene la variable `delay_minutes` y la llegada usada en REQ-F-30c.",
+   "multiple": false,
+   "orden": 6
+  },
+  {
+   "id": "DEC-07",
+   "grupo": "B",
+   "titulo": "Derivación de «conexión perdida» y tiempo mínimo de conexión",
+   "tipo": "INTERNA",
+   "pregunta": "¿Cómo se decide que `missed_connection` es verdadero si no es un dato y falta el tiempo mínimo de conexión (MCT)?",
+   "contexto": "R3 depende de `missed_connection == true`, que no existe en ningún dato (DAT-45). En el caso base la escala planificada es de 70 min y el retraso de 160 min: la llegada derivada (20:35) es 90 min posterior a la salida de S2 (19:05). Supuestos: A1 propagación íntegra, A2 sin MCT, A3 S2 no se retiene.",
+   "traz": {
+    "src": [
+     "SRC-02-07",
+     "SRC-03-03"
+    ],
+    "req": [
+     "REQ-F-30",
+     "REQ-F-18"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-11"
+    ],
+    "dat": [
+     "DAT-07",
+     "DAT-45",
+     "DAT-75"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Llegada derivada > salida del siguiente tramo (MCT = 0)",
+     "detalle": "Se evalúa en el mismo aeropuerto (sin zonas horarias).",
+     "pros": "Simple, sin inventar un MCT.",
+     "contras": "Podría marcar como salvable una conexión que en realidad no lo es.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Igual, con MCT configurable",
+     "detalle": "El MCT es un parámetro (p. ej. 0 por defecto) documentado como dato faltante.",
+     "pros": "Honesto sobre lo que falta; permite ajustar.",
+     "contras": "Hay que decidir el valor por defecto.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "No derivar: informar «conexión en riesgo» y escalar",
+     "detalle": "Nunca se afirma que se perdió; siempre confirma una persona.",
+     "pros": "Máxima prudencia.",
+     "contras": "Menos automatización; el pasajero espera más.",
+     "externas": false
+    },
+    {
+     "id": "d",
+     "titulo": "Derivar (b) y exigir confirmación humana antes de actuar",
+     "detalle": "El resultado se marca como estimado; el rebooking no se ejecuta sin confirmar.",
+     "pros": "Equilibra utilidad y control.",
+     "contras": "Requiere el flujo de aprobación (DEC-13, DEC-15).",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "d"
+   ],
+   "razon": "La derivación es útil pero no es un dato; por eso se muestra como estimación y la acción de alto impacto queda sujeta a confirmación.",
+   "efecto": "Define cómo se calcula la variable de R3 en REQ-F-30c y cómo se comunica (REQ-F-16).",
+   "multiple": false,
+   "orden": 7
+  },
+  {
+   "id": "DEC-08",
+   "grupo": "B",
+   "titulo": "Zonas horarias y fechas",
+   "tipo": "INTERNA",
+   "pregunta": "¿Cómo se tratan las horas «HH:MM» sin zona horaria?",
+   "contexto": "Verificado para el 15-sep-2026: Santiago UTC-3, Lima UTC-5, Ciudad de México UTC-6. Con zonas reales S1 duraría 5 h 25 min (sospechoso); con reloj único, 3 h 25 min (DAT-05). La conexión se evalúa en Lima con dos horas de Lima, así que no depende de zonas.",
+   "traz": {
+    "src": [
+     "SRC-02-07",
+     "SRC-02-08"
+    ],
+    "req": [
+     "REQ-F-21"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-15"
+    ],
+    "dat": [
+     "DAT-05",
+     "DAT-06",
+     "DAT-20"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Local del aeropuerto + comparar solo dentro del mismo aeropuerto + UTC para edades",
+     "detalle": "Se usa una tabla mínima versionada IATA→zona (SCL, LIM, MEX) solo cuando haya que convertir.",
+     "pros": "Correcto y mínimo.",
+     "contras": "Hay que mantener una tabla pequeña.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Reloj único (ignorar zonas)",
+     "detalle": "Se suman y restan horas como si fueran del mismo reloj.",
+     "pros": "Muy simple.",
+     "contras": "Incorrecto para cálculos entre aeropuertos.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Exigir offset en los datos",
+     "detalle": "Pedir que las tools devuelvan hora con zona.",
+     "pros": "Elimina la ambigüedad.",
+     "contras": "Modifica el contrato; el PDF pide mantenerlos (SRC-01-16).",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Evita errores sin cambiar contratos; la conexión (el caso crítico) no necesita zonas.",
+   "efecto": "Fija cómo se calculan las edades de datos (REQ-F-21) y la aritmética de fechas.",
+   "multiple": false,
+   "orden": 8
+  },
+  {
+   "id": "DEC-09",
+   "grupo": "B",
+   "titulo": "Fuentes contradictorias y precedencia (AMB-05)",
+   "tipo": "INTERNA",
+   "pregunta": "¿Qué regla se usa cuando dos fuentes dicen cosas distintas del mismo segmento?",
+   "contexto": "E-1012 (LEGACY_MIRROR, degradada, 09:30Z) dice ON_TIME; E-1001 (OPS_CORE, 10:48Z) dice retraso de 160 min. Además E-1012 tiene el id más alto (DAT-16). Aquí recencia y salud de fuente coinciden, pero el PDF pide una regla general (SRC-04-16).",
+   "traz": {
+    "src": [
+     "SRC-04-16",
+     "SRC-04-04",
+     "SRC-01-18"
+    ],
+    "req": [
+     "REQ-F-15",
+     "REQ-F-21",
+     "REQ-N-01"
+    ],
+    "amb": [
+     "AMB-05"
+    ],
+    "gap": [
+     "GAP-16"
+    ],
+    "dat": [
+     "DAT-15",
+     "DAT-16",
+     "DAT-26"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Regla compuesta",
+     "detalle": "1) excluir fuentes en `sources_degraded` como evidencia primaria; 2) entre las sanas, gana el `recorded_at` más reciente; 3) empate: jerarquía OPS_CORE > AIRPORT_FEED > LEGACY_MIRROR; 4) si no queda fuente sana o el conflicto no se resuelve: mensaje cauto y humano.",
+     "pros": "Cubre salud, recencia y empate; auditable.",
+     "contras": "La jerarquía de fuentes es un supuesto mío que debes confirmar.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Solo recencia",
+     "detalle": "Gana el evento más reciente.",
+     "pros": "Muy simple.",
+     "contras": "Elegiría un evento de una fuente degradada si fuera más nuevo.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Solo jerarquía fija",
+     "detalle": "Gana siempre OPS_CORE.",
+     "pros": "Predecible.",
+     "contras": "Ignora que un dato sano puede ser viejo.",
+     "externas": false
+    },
+    {
+     "id": "d",
+     "titulo": "Siempre humano ante conflicto",
+     "detalle": "Cualquier contradicción escala.",
+     "pros": "Máxima prudencia.",
+     "contras": "Más intervención humana y más contactos.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Es la única que evita mostrar ON_TIME y a la vez maneja los casos que no son tan claros como el del ejemplo.",
+   "efecto": "Define el contenido de REQ-F-15 y la condición de bloqueo de REQ-F-16 cuando hay conflicto.",
+   "multiple": false,
+   "orden": 9
+  },
+  {
+   "id": "DEC-10",
+   "grupo": "B",
+   "titulo": "Frescura y vigencia de los datos",
+   "tipo": "INTERNA",
+   "pregunta": "¿Qué antigüedad máxima se tolera para informar y para actuar?",
+   "contexto": "El PDF pide controlar la frescura (SRC-01-18) pero no da umbrales. Los eventos válidos del ejemplo tenían 14 y 7 minutos al recuperarlos; las opciones vencen a los 120 s (DAT-17, DAT-35).",
+   "traz": {
+    "src": [
+     "SRC-01-18",
+     "SRC-03-02"
+    ],
+    "req": [
+     "REQ-F-21",
+     "REQ-F-25"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-16"
+    ],
+    "dat": [
+     "DAT-17",
+     "DAT-35"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Umbrales distintos por tipo de uso",
+     "detalle": "Informar estado: hasta 15 min; actuar: datos recuperados en la misma operación y revalidados; opciones: respetar el TTL; política: revalidar versión antes de escribir. Los valores son parámetros.",
+     "pros": "Proporcional al riesgo.",
+     "contras": "Los números son propuestas mías que debes confirmar.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Un umbral único",
+     "detalle": "Por ejemplo 10 minutos para todo.",
+     "pros": "Simple.",
+     "contras": "No distingue informar de actuar.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Sin umbral; solo mostrar la hora",
+     "detalle": "El mensaje incluye la hora de la información.",
+     "pros": "Nada que configurar.",
+     "contras": "No cumple «controlar la frescura».",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "El riesgo de un dato viejo es mayor al ejecutar que al informar.",
+   "efecto": "Fija parámetros de REQ-F-21 y REQ-F-25 y la regla DQ-14/DQ-15.",
+   "multiple": false,
+   "orden": 10
+  },
+  {
+   "id": "DEC-11",
+   "grupo": "B",
+   "titulo": "Datos parciales (`completeness: PARTIAL`)",
+   "tipo": "INTERNA",
+   "pregunta": "¿Qué se puede hacer y decir cuando faltan campos?",
+   "contexto": "Falta `change_penalty_amount`; además `missing_fields` no es exhaustivo (faltan cabina, estado del ticket, mapa pasajero-segmento) (DAT-09).",
+   "traz": {
+    "src": [
+     "SRC-01-17",
+     "SRC-02-07"
+    ],
+    "req": [
+     "REQ-F-22"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-17"
+    ],
+    "dat": [
+     "DAT-09"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Condicionar cada afirmación a los campos que necesita",
+     "detalle": "Hay una tabla afirmación → campos requeridos. Si falta alguno, no se afirma ni se cotiza.",
+     "pros": "Preciso; permite responder lo que sí se sabe.",
+     "contras": "Hay que mantener la tabla.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Bloquear toda respuesta si es PARTIAL",
+     "detalle": "Si la reserva es parcial, no se responde.",
+     "pros": "Muy seguro.",
+     "contras": "Inutiliza el producto: casi siempre será parcial.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Rellenar con valores por defecto",
+     "detalle": "Suponer el dato faltante.",
+     "pros": "Siempre responde.",
+     "contras": "Peligroso: inventa información.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Es lo que permite 'tolerar información parcial' sin inventar.",
+   "efecto": "Define la tabla de gating de REQ-F-22 y la regla DQ-28.",
+   "multiple": false,
+   "orden": 11
+  },
+  {
+   "id": "DEC-12",
+   "grupo": "B",
+   "titulo": "Evaluación segura de reglas y variables derivadas",
+   "tipo": "INTERNA",
+   "pregunta": "¿Cómo se evalúan las `condition` (texto) y se derivan las cuatro variables que no vienen en los datos?",
+   "contexto": "R1-R5 son cadenas con un mini-lenguaje no definido (solo se ven `>=`, `==`, `AND`). `international`, `missed_connection`, `compensation_requested` y `group_includes_minor` no existen en ningún dato (DAT-45, DAT-48).",
+   "traz": {
+    "src": [
+     "SRC-03-03"
+    ],
+    "req": [
+     "REQ-F-19"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-18"
+    ],
+    "dat": [
+     "DAT-45",
+     "DAT-48"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Mapear cada (versión, regla) a un predicado codificado",
+     "detalle": "Cada regla conocida tiene su función; una regla o versión desconocida escala a humano.",
+     "pros": "Seguro y sencillo.",
+     "contras": "Acopla el código a versiones concretas.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Parser acotado con lista blanca",
+     "detalle": "Solo reconoce identificadores conocidos, `>=`, `==` y `AND`; lo demás es error.",
+     "pros": "Genérico y seguro; entiende reglas nuevas del mismo estilo.",
+     "contras": "Hay que escribir y probar el parser.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Evaluar con un intérprete dinámico",
+     "detalle": "Ejecutar el texto de la condición.",
+     "pros": "Muy rápido de escribir.",
+     "contras": "Riesgo de inyección y comportamiento impredecible.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "b"
+   ],
+   "razon": "Un parser mínimo con lista blanca es pequeño, generaliza a reglas nuevas y falla de forma segura. Si falta tiempo, a es el respaldo.",
+   "efecto": "Define cómo se implementa REQ-F-19 y registra cada variable derivada como DERIVADA con sus supuestos (REQ-F-28).",
+   "multiple": false,
+   "orden": 12
+  },
+  {
+   "id": "DEC-13",
+   "grupo": "B",
+   "titulo": "Precedencia entre reglas (R3 vs R5) y aprobación humana",
+   "tipo": "INTERNA",
+   "pregunta": "Si R3 no exige aprobación pero R5 sí (hay un menor), ¿se puede ejecutar el rebooking?",
+   "contexto": "El PDF no define cómo se combinan las reglas (DAT-47). Lecturas: L1 cada regla gobierna solo su propio derecho; L2 R5 condiciona toda acción del caso. Además cambiar una reserva es una acción de alto impacto (SRC-04-06).",
+   "traz": {
+    "src": [
+     "SRC-03-03",
+     "SRC-04-06"
+    ],
+    "req": [
+     "REQ-F-17",
+     "REQ-F-14"
+    ],
+    "amb": [
+     "AMB-03",
+     "AMB-04"
+    ],
+    "gap": [
+     "GAP-19"
+    ],
+    "dat": [
+     "DAT-46",
+     "DAT-47"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Gana la regla más restrictiva (L2)",
+     "detalle": "Si cualquier regla aplicable exige aprobación humana, el caso completo queda pendiente de esa aprobación.",
+     "pros": "Seguro; protege al menor; simple de explicar.",
+     "contras": "Más intervención humana.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Cada derecho por separado (L1)",
+     "detalle": "El rebooking (R3) procede solo; la atención prioritaria (R5) pasa por humano.",
+     "pros": "Más automatización.",
+     "contras": "Se podría rebookear al grupo sin que una persona revise la situación del menor.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "R5 no bloquea, pero obliga a abrir caso y a un mensaje cauto",
+     "detalle": "El rebooking se prepara, pero se comunica «en revisión».",
+     "pros": "Término medio.",
+     "contras": "Mensaje ambiguo para el pasajero.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Con un menor y una acción de alto impacto, la lectura conservadora es la defendible en v1.",
+   "efecto": "Define la regla de combinación que usa REQ-F-17 y los disparadores de REQ-F-14. Condiciona el resultado esperado REQ-F-30g.",
+   "multiple": false,
+   "orden": 13
+  },
+  {
+   "id": "DEC-14",
+   "grupo": "C",
+   "titulo": "Qué se entrega de forma automática (AMB-03)",
+   "tipo": "INTERNA",
+   "pregunta": "¿Qué acciones y mensajes puede producir el sistema sin intervención humana?",
+   "contexto": "El PDF no lo define (SRC-04-14). Las tools de escritura son de alto impacto; los mensajes no deben llevar información no validada (SRC-02-05).",
+   "traz": {
+    "src": [
+     "SRC-04-14",
+     "SRC-01-10"
+    ],
+    "req": [
+     "REQ-F-13",
+     "REQ-F-17"
+    ],
+    "amb": [
+     "AMB-03"
+    ],
+    "gap": [],
+    "dat": [
+     "DAT-47"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Automático solo informar y explicar con hechos validados",
+     "detalle": "Estado del viaje, explicación de la modificación y propuesta de siguiente paso (como propuesta). Toda escritura requiere confirmación humana en v1.",
+     "pros": "Seguro; cumple 'sin acciones de alto impacto sin controles'.",
+     "contras": "El pasajero espera la confirmación para el cambio.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Además recomendar y ejecutar cuando R1 o R3 y sin menor y con datos completos",
+     "detalle": "Rebooking automático bajo condiciones estrictas.",
+     "pros": "Más resolución sin contacto humano.",
+     "contras": "Riesgo alto en la primera versión; más superficie de error.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Todo con humano",
+     "detalle": "Ni siquiera se informa sin revisión.",
+     "pros": "Máximo control.",
+     "contras": "No reduce contactos evitables (SRC-01-11).",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Equilibra el objetivo de reducir contactos con las restricciones de control (SRC-01-10, SRC-04-06).",
+   "efecto": "Define la matriz acción × condiciones de REQ-F-13 y qué escrituras requieren REQ-F-17.",
+   "multiple": false,
+   "orden": 14
+  },
+  {
+   "id": "DEC-15",
+   "grupo": "C",
+   "titulo": "Cuándo interviene una persona (AMB-04)",
+   "tipo": "INTERNA",
+   "pregunta": "¿Qué situaciones obligan a crear un caso humano antes de actuar o comunicar? (selección múltiple)",
+   "contexto": "El PDF no lo define (SRC-04-15). `create_human_case` existe con cola DISRUPTION_L2 y SLA de 45 min; no define el esquema de `reason`/`evidence` (DAT-64).",
+   "traz": {
+    "src": [
+     "SRC-04-15",
+     "SRC-02-04"
+    ],
+    "req": [
+     "REQ-F-14",
+     "REQ-F-26",
+     "REQ-F-04"
+    ],
+    "amb": [
+     "AMB-04"
+    ],
+    "gap": [
+     "GAP-26"
+    ],
+    "dat": [
+     "DAT-64"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Hay un menor en el grupo (R5)",
+     "detalle": "Siempre caso humano.",
+     "pros": "Protege al menor.",
+     "contras": "Aumenta casos.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "El pasajero solicita compensación (R4)",
+     "detalle": "Siempre caso humano, sin montos.",
+     "pros": "Evita promesas.",
+     "contras": "—",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Datos parciales que bloquean la afirmación",
+     "detalle": "Si falta un campo necesario para el mensaje.",
+     "pros": "Evita inventar.",
+     "contras": "—",
+     "externas": false
+    },
+    {
+     "id": "d",
+     "titulo": "Fuentes en conflicto sin resolver",
+     "detalle": "Según DEC-09 punto 4.",
+     "pros": "Evita mensajes falsos.",
+     "contras": "—",
+     "externas": false
+    },
+    {
+     "id": "e",
+     "titulo": "Resultado indeterminado (503)",
+     "detalle": "Tras reintentos acotados.",
+     "pros": "Evita duplicados y falsas confirmaciones.",
+     "contras": "—",
+     "externas": false
+    },
+    {
+     "id": "f",
+     "titulo": "Evento de tipo desconocido",
+     "detalle": "Por ejemplo cancelación si no está soportada.",
+     "pros": "Falla seguro.",
+     "contras": "—",
+     "externas": false
+    },
+    {
+     "id": "g",
+     "titulo": "Ninguna opción cubre a todo el grupo",
+     "detalle": "Cupos menores que pasajeros.",
+     "pros": "No separa familias.",
+     "contras": "—",
+     "externas": false
+    },
+    {
+     "id": "h",
+     "titulo": "Pernocte u otra asistencia no cubierta por la política",
+     "detalle": "Alojamiento, comidas, traslados.",
+     "pros": "No promete lo que no hay regla.",
+     "contras": "—",
+     "externas": false
+    },
+    {
+     "id": "i",
+     "titulo": "Se solicitan datos personales",
+     "detalle": "Documento, correo, teléfono.",
+     "pros": "Mínimo privilegio.",
+     "contras": "—",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f",
+    "g",
+    "h",
+    "i"
+   ],
+   "razon": "Son los puntos donde el sistema carece de dato, de regla o de control; escalar es lo defendible. La lista es ajustable casilla por casilla.",
+   "efecto": "Convierte AMB-04 en disparadores explícitos de REQ-F-14 y define cuándo se invoca REQ-F-26.",
+   "multiple": true,
+   "orden": 15
+  },
+  {
+   "id": "DEC-16",
+   "grupo": "C",
+   "titulo": "Menores y grupos familiares (producto)",
+   "tipo": "INTERNA",
+   "pregunta": "¿Cómo trata el producto un grupo con menor al ofrecer y ejecutar opciones?",
+   "contexto": "O2 tiene 1 cupo para 2 pasajeros (DAT-31). Las opciones no indican qué pasajeros cubren ni cabina (DAT-43). `create_rebooking_request` no recibe pasajeros (DAT-62).",
+   "traz": {
+    "src": [
+     "SRC-03-02",
+     "SRC-03-03"
+    ],
+    "req": [
+     "REQ-F-17",
+     "REQ-F-14"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-08",
+     "GAP-20"
+    ],
+    "dat": [
+     "DAT-03",
+     "DAT-31",
+     "DAT-43",
+     "DAT-62"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Regla dura: nunca separar al grupo",
+     "detalle": "Solo se ofrecen y ejecutan opciones que cubran a todo el grupo juntos; con un menor siempre se abre caso humano antes de rebookear.",
+     "pros": "Protege al menor; simple.",
+     "contras": "Reduce opciones ofrecidas.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Permitir opciones parciales con aviso",
+     "detalle": "Se informa que solo hay lugar para parte del grupo.",
+     "pros": "Más opciones.",
+     "contras": "Riesgo de separar a un niño de su acompañante.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Que decida el pasajero",
+     "detalle": "Se presentan todas las opciones y él elige.",
+     "pros": "Autonomía.",
+     "contras": "Traslada una decisión delicada a quien tiene menos información.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Es la lectura más segura de 'cambiar una reserva es de alto impacto' con un menor.",
+   "efecto": "Añade una restricción explícita a REQ-F-17 y a la selección de opciones (REQ-F-20).",
+   "multiple": false,
+   "orden": 16
+  },
+  {
+   "id": "DEC-17",
+   "grupo": "C",
+   "titulo": "Selección y presentación de opciones",
+   "tipo": "INTERNA",
+   "pregunta": "¿Qué opciones ve el pasajero y cómo se trata `confidence`?",
+   "contexto": "Las opciones son candidatas, no decisión final (SRC-02-01). O1 es viable; O2 no (cupo y costo); O3 es un cascarón sin monto y sin política recuperada (DAT-31 a DAT-33). `confidence` no está definida (DAT-36).",
+   "traz": {
+    "src": [
+     "SRC-02-01",
+     "SRC-03-02"
+    ],
+    "req": [
+     "REQ-F-20",
+     "REQ-F-03"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-17",
+     "GAP-20"
+    ],
+    "dat": [
+     "DAT-31",
+     "DAT-32",
+     "DAT-33",
+     "DAT-36"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Mostrar solo opciones viables y coherentes, más la vía de reembolso como alternativa",
+     "detalle": "O1 como propuesta principal; la devolución como otra vía sin montos ni plazos; O2 no se muestra (se registra por qué).",
+     "pros": "Evita confundir; cumple 'no información no verificada'.",
+     "contras": "El pasajero no ve que existía O2.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Mostrar todas ordenadas por `confidence` con advertencias",
+     "detalle": "Transparencia completa.",
+     "pros": "Todo a la vista.",
+     "contras": "Muestra opciones inviables y un campo sin definición.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Mostrar solo la recomendada",
+     "detalle": "Una única propuesta.",
+     "pros": "Muy claro.",
+     "contras": "Poca autonomía.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "La viabilidad (cupos, costo, política) se valida; `confidence` se usa solo para ordenar, nunca para decidir.",
+   "efecto": "Define el filtro de REQ-F-20 y el contenido del mensaje de REQ-F-03.",
+   "multiple": false,
+   "orden": 17
+  },
+  {
+   "id": "DEC-18",
+   "grupo": "C",
+   "titulo": "Ciclo de vida del rebooking: idempotencia, 409, 503 y PENDING_CONFIRMATION",
+   "tipo": "INTERNA",
+   "pregunta": "¿Cómo se diseñan la llave idempotente y el manejo de 409/503, y qué se hace con PENDING_CONFIRMATION?",
+   "contexto": "503 deja el resultado indeterminado y no hay tool para consultar estado (DAT-59, GAP-12). 409 devuelve el mismo request_id (DAT-60). PENDING_CONFIRMATION no tiene tool de confirmación y expira en ~9 min (DAT-61). La llamada no incluye reserva ni pasajeros (DAT-62).",
+   "traz": {
+    "src": [
+     "SRC-02-03",
+     "SRC-03-04",
+     "SRC-04-01"
+    ],
+    "req": [
+     "REQ-F-23",
+     "REQ-F-24",
+     "REQ-C-05"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-12"
+    ],
+    "dat": [
+     "DAT-59",
+     "DAT-60",
+     "DAT-61",
+     "DAT-62",
+     "DAT-63"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Llave determinista persistida antes de llamar; 503 → mismos reintentos acotados → caso humano; 409 → existente",
+     "detalle": "Llave derivada de la operación (reserva + vuelo/fecha + versión de política + decisión). 503: hasta 2 reintentos con la misma llave y luego caso humano, sin decirle al pasajero ni éxito ni fracaso. 409: tratar como solicitud existente. PENDING_CONFIRMATION: confirmación fuera de alcance de v1, documentada como supuesto.",
+     "pros": "Evita duplicados y falsas confirmaciones; coherente con el contrato.",
+     "contras": "Hay que documentar que la confirmación queda fuera.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "503 → caso humano inmediato",
+     "detalle": "Sin reintentos.",
+     "pros": "Más simple.",
+     "contras": "Más carga humana por fallas transitorias.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Llave aleatoria por intento",
+     "detalle": "UUID nuevo en cada llamada.",
+     "pros": "Trivial.",
+     "contras": "No es idempotente: puede duplicar un cambio de reserva.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Es la única variante que respeta que 503 es indeterminado y que el rebooking es de alto impacto.",
+   "efecto": "Fija el contenido de REQ-F-23 y REQ-F-24 y la extensión documentada del contrato (reserva y pasajeros) de REQ-C-05.",
+   "multiple": false,
+   "orden": 18
+  },
+  {
+   "id": "DEC-19",
+   "grupo": "C",
+   "titulo": "Alineación de tiempos: TTL, expiración y SLA humano",
+   "tipo": "INTERNA",
+   "pregunta": "¿Cómo se concilian opciones que vencen en 2 min, una solicitud que expira en ~9 min y un caso humano con SLA de 45 min?",
+   "contexto": "Una aprobación humana siempre llegará con opciones vencidas y con la solicitud caducada (DAT-77, GAP-25).",
+   "traz": {
+    "src": [
+     "SRC-03-02",
+     "SRC-03-04",
+     "SRC-04-02"
+    ],
+    "req": [
+     "REQ-F-25",
+     "REQ-F-26"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-25"
+    ],
+    "dat": [
+     "DAT-35",
+     "DAT-58",
+     "DAT-77"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Revalidar todo justo antes de escribir",
+     "detalle": "La aprobación humana autoriza una decisión (qué opción), no la ejecución con datos viejos; al aprobar se recuperan de nuevo opciones y política. El mensaje dice «sujeto a disponibilidad».",
+     "pros": "Respeta TTL y versión de política.",
+     "contras": "El cupo puede ya no existir: hay que prever el reintento o el caso humano.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Reservar cupo durante la aprobación",
+     "detalle": "Un «hold» de asiento.",
+     "pros": "Asegura el cupo.",
+     "contras": "No existe tool para ello.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Ignorar el TTL",
+     "detalle": "Usar la opción aunque haya vencido.",
+     "pros": "Simple.",
+     "contras": "Viola REQ-F-25; puede fallar o rebookear mal.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "No hay mecanismo de reserva en el contrato; revalidar es lo único coherente.",
+   "efecto": "Añade el paso de revalidación a REQ-F-25 y REQ-F-26 y al flujo de aprobación.",
+   "multiple": false,
+   "orden": 19
+  },
+  {
+   "id": "DEC-20",
+   "grupo": "C",
+   "titulo": "Contrato de `notify_passenger` y validación del mensaje",
+   "tipo": "INTERNA",
+   "pregunta": "¿Cómo se construyen y validan los mensajes, y a quién se envían si la firma no incluye destinatario?",
+   "contexto": "La firma es `notify_passenger(message)`; el 422 solo comprueba que haya `policy_ref` (DAT-65). El requisito es más estricto: no enviar información no validada (SRC-02-05). El canal visto es PUSH y el menor no tiene contacto (DAT-71).",
+   "traz": {
+    "src": [
+     "SRC-02-05",
+     "SRC-04-03"
+    ],
+    "req": [
+     "REQ-F-16",
+     "REQ-F-29",
+     "REQ-F-09",
+     "REQ-C-07"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-13",
+     "GAP-22"
+    ],
+    "dat": [
+     "DAT-65",
+     "DAT-71"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Plantillas con hechos validados + `policy_ref` + destinatario (extensión del contrato)",
+     "detalle": "Cada mensaje sale de una plantilla cuyos huecos solo admiten hechos de una lista blanca con evidencia vigente. Un validador propio bloquea el envío si falta evidencia, `policy_ref` o destinatario. Un envío por decisión (con llave de deduplicación).",
+     "pros": "Cumple 'no información no validada' con evidencia; fácil de probar.",
+     "contras": "Mensajes menos flexibles; hay que extender el contrato en el mock.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Texto libre generado y validado luego",
+     "detalle": "Un modelo redacta y un validador revisa.",
+     "pros": "Más natural.",
+     "contras": "Validar texto libre es difícil; ver DEC-02.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Solo `policy_ref`, confiando en el 422",
+     "detalle": "Sin validador propio.",
+     "pros": "Mínimo esfuerzo.",
+     "contras": "El 422 no valida que el contenido sea verdadero.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Es la forma de cumplir REQ-F-16 con evidencia verificable por tests (TC-16).",
+   "efecto": "Define la capa complementaria de REQ-F-09 (especificación del mensaje) y el validador de REQ-F-29.",
+   "multiple": false,
+   "orden": 20
+  },
+  {
+   "id": "DEC-21",
+   "grupo": "D",
+   "titulo": "Información visible al pasajero y verificación de identidad (AMB-02)",
+   "tipo": "INTERNA",
+   "pregunta": "¿Qué campos y hechos puede ver el pasajero, y cómo se sabe que es quien dice ser?",
+   "contexto": "`booking_id` abre PII y no es una credencial (DAT-01). El PDF pide proteger datos y aplicar mínimo privilegio (SRC-04-07) pero no define identificación (GAP-21).",
+   "traz": {
+    "src": [
+     "SRC-04-13",
+     "SRC-04-07",
+     "SRC-01-12"
+    ],
+    "req": [
+     "REQ-F-12",
+     "REQ-F-01",
+     "REQ-N-04"
+    ],
+    "amb": [
+     "AMB-02"
+    ],
+    "gap": [
+     "GAP-21"
+    ],
+    "dat": [
+     "DAT-01"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Sesión ya autenticada (supuesto documentado) + lista blanca de campos",
+     "detalle": "Se asume que el pasajero llega autenticado; se muestran segmentos, horarios, estado, opciones viables y derechos citados; nunca documento, correo, teléfono completo ni nivel de fidelidad; solo nombre de pila.",
+     "pros": "Realista para v1; cumple mínimo privilegio.",
+     "contras": "Deja la autenticación como dependencia externa.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Mostrar todo lo que devuelve la tool",
+     "detalle": "Sin filtro.",
+     "pros": "Sin trabajo.",
+     "contras": "Expone PII; viola SRC-04-07.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Verificación explícita en cada consulta",
+     "detalle": "Segundo factor o datos de la reserva.",
+     "pros": "Más seguro.",
+     "contras": "Mucho más alcance y fricción.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Acota v1 sin exponer datos y deja la dependencia explícita.",
+   "efecto": "Define la lista blanca de REQ-F-12 y el supuesto de REQ-F-01.",
+   "multiple": false,
+   "orden": 21
+  },
+  {
+   "id": "DEC-22",
+   "grupo": "D",
+   "titulo": "Datos personales, mínimo privilegio y «qué nunca va a un modelo»",
+   "tipo": "INTERNA",
+   "pregunta": "¿Dónde se aplica la minimización de PII y qué información nunca se entrega a un modelo?",
+   "contexto": "Cinco campos PII viajan en una sola lectura y el contrato de `get_eligible_options` exige el `trip_context` completo (DAT-02, DAT-79). Mantener los contratos choca con mínimo privilegio.",
+   "traz": {
+    "src": [
+     "SRC-04-07",
+     "SRC-01-16",
+     "SRC-05-04"
+    ],
+    "req": [
+     "REQ-N-04",
+     "REQ-F-27",
+     "REQ-D-08"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-27"
+    ],
+    "dat": [
+     "DAT-02",
+     "DAT-38",
+     "DAT-79"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Mantener las firmas y minimizar en todas las fronteras que controlas",
+     "detalle": "Contexto mínimo para decidir (sin correo, teléfono, documento, nivel de fidelidad; nombre de pila; `has_minor` como booleano); logs enmascarados; evidencia de casos humanos solo con ids y hechos; ningún dato personal a un modelo. Se propone al equipo un contrato reducido para `get_eligible_options`.",
+     "pros": "Respeta SRC-01-16 y SRC-04-07 a la vez.",
+     "contras": "La tool sigue recibiendo todo.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Contrato reducido en el mock",
+     "detalle": "El mock de `get_eligible_options` recibe solo el contexto mínimo.",
+     "pros": "Mejor privilegio.",
+     "contras": "Rompe «mantén estos contratos».",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Sin minimización",
+     "detalle": "Pasar y registrar todo.",
+     "pros": "Sin trabajo.",
+     "contras": "Incumple SRC-04-07.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Es la lectura que cumple las dos instrucciones del PDF; la lista de lo que nunca va a un modelo alimenta el Entregable 3.",
+   "efecto": "Define el inventario de REQ-N-04, el límite de REQ-F-27 y el contenido de REQ-D-08 (d).",
+   "multiple": false,
+   "orden": 22
+  },
+  {
+   "id": "DEC-23",
+   "grupo": "D",
+   "titulo": "Trazabilidad, auditoría y retención",
+   "tipo": "INTERNA",
+   "pregunta": "¿Qué se registra de cada decisión y por cuánto tiempo?",
+   "contexto": "Objetivo: exactitud, seguridad y trazabilidad (SRC-01-11). No hay identificador de correlación de punta a punta (DAT-73). El marco legal de retención no está definido (GAP-27).",
+   "traz": {
+    "src": [
+     "SRC-01-11",
+     "SRC-07-05"
+    ],
+    "req": [
+     "REQ-F-28",
+     "REQ-N-08"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-27"
+    ],
+    "dat": [
+     "DAT-73",
+     "DAT-80"
+    ],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Registro de decisión estructurado y sin PII",
+     "detalle": "Un `decision_id` que ata: lecturas usadas con su `retrieved_at`, eventos elegidos y descartados con razón, versión de política y regla, variables derivadas con supuestos, opción, acción, mensaje y hashes. La retención es un parámetro a definir.",
+     "pros": "Reconstruible; auditable; defendible.",
+     "contras": "Hay que definir la retención.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Logs de aplicación sin estructura",
+     "detalle": "Mensajes de texto.",
+     "pros": "Rápido.",
+     "contras": "Difícil de reconstruir y de auditar.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Solo el resultado final",
+     "detalle": "Guardar la salida.",
+     "pros": "Mínimo.",
+     "contras": "No cumple trazabilidad.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Es lo que permite defender cada decisión en el debate técnico.",
+   "efecto": "Define el contenido de REQ-F-28 y la evidencia de REQ-E-05.",
+   "multiple": false,
+   "orden": 23
+  },
+  {
+   "id": "DEC-24",
+   "grupo": "D",
+   "titulo": "Validación mínima, operación, latencia, costo y métrica de éxito",
+   "tipo": "INTERNA",
+   "pregunta": "¿Qué pruebas, presupuestos y métricas se declaran?",
+   "contexto": "El slice necesita al menos una validación o test (SRC-04-18). La operación debe ser viable para un equipo pequeño y hay que considerar latencia, costo y dependencia de modelos (SRC-04-08, SRC-04-09). Se pide decir cómo se mediría el resultado (SRC-07-01).",
+   "traz": {
+    "src": [
+     "SRC-01-02",
+     "SRC-04-08",
+     "SRC-04-09",
+     "SRC-07-01",
+     "SRC-07-04"
+    ],
+    "req": [
+     "REQ-D-05",
+     "REQ-N-05",
+     "REQ-N-06",
+     "REQ-N-09",
+     "REQ-E-01",
+     "REQ-E-04"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-23",
+     "GAP-24"
+    ],
+    "dat": [],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Conjunto crítico + métricas propuestas + runbook de una página",
+     "detalle": "Pruebas: TC-01, 02, 03, 09, 14, 16 y borde de R1. Métricas propuestas: contactos al call center tras la notificación; mensajes validados sin corrección humana; casos escalados. Presupuestos como parámetros. Runbook mínimo.",
+     "pros": "Cubre calidad y operación con poco trabajo.",
+     "contras": "Las métricas son propuestas mías.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Batería amplia (TC-01 a TC-20)",
+     "detalle": "Todas las pruebas sugeridas.",
+     "pros": "Máxima cobertura.",
+     "contras": "No cabe bien en 3 horas.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Solo el caso base",
+     "detalle": "Una prueba.",
+     "pros": "Mínimo.",
+     "contras": "No demuestra criterio sobre las trampas.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Prioriza evidencia donde más importa (SRC-07-05).",
+   "efecto": "Fija REQ-D-05, los presupuestos de REQ-N-05/06 y la métrica de REQ-N-09.",
+   "multiple": false,
+   "orden": 24
+  },
+  {
+   "id": "DEC-35",
+   "grupo": "E",
+   "titulo": "Marco: cómo se incorporan las políticas externas",
+   "tipo": "EXTERNA",
+   "pregunta": "¿Las políticas de la aerolínea y las normas por país son fuente de verdad del producto, solo contexto, o se ignoran?",
+   "contexto": "El PDF solo define `get_policy_rules` como fuente de reglas «versionadas y verificables» (SRC-02-02). Las páginas de la aerolínea y normas por país traen umbrales distintos (por ejemplo 31 min vs 180 min; 2 h vs 240 min). Esta decisión enmarca DEC-25 a DEC-34 y conviene tomarla primero.",
+   "traz": {
+    "src": [
+     "SRC-02-02",
+     "SRC-04-11",
+     "SRC-04-10"
+    ],
+    "req": [
+     "REQ-P-11",
+     "REQ-N-07"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-01",
+     "GAP-02",
+     "GAP-03",
+     "GAP-04",
+     "GAP-05",
+     "GAP-06",
+     "GAP-07",
+     "GAP-08",
+     "GAP-09",
+     "GAP-10",
+     "GAP-14"
+    ],
+    "dat": [],
+    "pol": []
+   },
+   "referencias": [
+    {
+     "etiqueta": "LEEME",
+     "archivo": "05_Politicas_Externas/00_LEEME_Politicas.md",
+     "resumen": "Estado de captura de cada fuente y qué país importa para el caso (§3)."
+    },
+    {
+     "etiqueta": "CRUCE",
+     "archivo": "05_Politicas_Externas/16_Referencias_cruzadas.md",
+     "resumen": "Qué política toca qué brecha, requerimiento y decisión."
+    },
+    {
+     "etiqueta": "MATRIZ",
+     "archivo": "05_Politicas_Externas/15_Matriz_comparativa.md",
+     "resumen": "Comparación por tema entre todas las fuentes y las reglas del PDF."
+    }
+   ],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Solo contexto: el producto usa únicamente `get_policy_rules`",
+     "detalle": "Las políticas externas sirven para identificar brechas, riesgos y preguntas (README: supuestos y próximos pasos), no como reglas del motor.",
+     "pros": "Coherente con el PDF; evita afirmar derechos incorrectos; poco trabajo.",
+     "contras": "El producto no reflejará derechos legales que la política del PDF no incluya.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Tabla propia de políticas por jurisdicción",
+     "detalle": "Se carga una tabla versionada, revisada por Legal, que complementa a `get_policy_rules`.",
+     "pros": "Más completo y cercano a la realidad.",
+     "contras": "Fuera del alcance de 3 horas; requiere revisión legal; hay fuentes parciales o secundarias.",
+     "externas": true
+    },
+    {
+     "id": "c",
+     "titulo": "Ignorarlas por completo",
+     "detalle": "No se menciona nada externo.",
+     "pros": "Máxima simplicidad.",
+     "contras": "Pierde una fuente de supuestos y preguntas valiosas para la defensa.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Es la opción defendible con el tiempo y la información disponibles: el PDF no pide derecho comparado, pero la defensa gana si se muestran las brechas y las preguntas.",
+   "efecto": "Determina si REQ-F-19 se apoya solo en `get_policy_rules` y qué brechas GAP-01…10 pasan a «preguntas/próximos pasos» en el README (REQ-D-07).",
+   "multiple": false,
+   "orden": 0
+  },
+  {
+   "id": "DEC-25",
+   "grupo": "E",
+   "titulo": "Jurisdicción aplicable por segmento",
+   "tipo": "EXTERNA",
+   "pregunta": "¿Qué ley o política de país se considera para S1 (SCL→LIM) y para S2 (LIM→MEX)?",
+   "contexto": "Las reglas del PDF no traen país (DAT-51). Chile aplica «solo a vuelos con origen en Chile» (S1). Perú/CAN-619 aplica a quien «inicia su viaje» en un país andino; este pasajero inició en Chile, que no es miembro, así que su aplicación a S2 es ambigua. México no figura en la fuente (GAP-14).",
+   "traz": {
+    "src": [
+     "SRC-03-03"
+    ],
+    "req": [
+     "REQ-F-19",
+     "REQ-F-18"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-01",
+     "GAP-14"
+    ],
+    "dat": [
+     "DAT-51"
+    ],
+    "pol": [
+     "POL-CL-00",
+     "POL-PE-01",
+     "POL-PE-16"
+    ]
+   },
+   "referencias": [
+    {
+     "etiqueta": "POL-CL-00",
+     "archivo": "05_Politicas_Externas/03_Chile_conoce-tus-derechos.md",
+     "resumen": "Las soluciones valen solo en Chile (vuelos con origen en Chile)."
+    },
+    {
+     "etiqueta": "POL-PE-01",
+     "archivo": "05_Politicas_Externas/04_Peru_Decision_619_CAN.md",
+     "resumen": "Decisión 619 art. 2: aplica a quien inicia su viaje en un país andino, o es transferido allí por el transportista."
+    },
+    {
+     "etiqueta": "POL-PE-16",
+     "archivo": "05_Politicas_Externas/04_Peru_Decision_619_CAN.md",
+     "resumen": "Art. 24: no se pueden imponer condiciones inferiores a las de la Decisión."
+    },
+    {
+     "etiqueta": "LEEME",
+     "archivo": "05_Politicas_Externas/00_LEEME_Politicas.md",
+     "resumen": "Estado de captura de cada fuente y qué país importa para el caso (§3)."
+    },
+    {
+     "etiqueta": "CRUCE",
+     "archivo": "05_Politicas_Externas/16_Referencias_cruzadas.md",
+     "resumen": "Qué política toca qué brecha, requerimiento y decisión."
+    }
+   ],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Solo `get_policy_rules`; jurisdicción como punto de extensión",
+     "detalle": "v1 no aplica ley por país; se deja el campo `jurisdiction` previsto y la pregunta documentada para Producto/Legal.",
+     "pros": "No afirma derechos que dependen de jurisdicción y causa no modeladas.",
+     "contras": "No refleja diferencias legales.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Chile para S1 y CAN-619 para S2 como piso informativo",
+     "detalle": "Los mensajes citan derechos legales de cada país con revisión humana.",
+     "pros": "Más fiel a la realidad.",
+     "contras": "Ambigüedad del art. 2 de la Decisión 619; se mezclan política interna y ley.",
+     "externas": true
+    },
+    {
+     "id": "c",
+     "titulo": "La más favorable al pasajero",
+     "detalle": "Se aplica entre PDF, Chile y Perú lo que más beneficie.",
+     "pros": "Protege al pasajero.",
+     "contras": "Costo e incumplimiento si la política comercial es menor; requiere criterio legal.",
+     "externas": true
+    },
+    {
+     "id": "d",
+     "titulo": "Escalar a humano toda disputa de jurisdicción",
+     "detalle": "El sistema no decide; abre caso.",
+     "pros": "Evita error legal.",
+     "contras": "Más carga humana.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Con el dato disponible no se puede decidir jurisdicción sin inventar. Se documenta como supuesto bloqueante («qué preguntarías y a quién»: SRC-04-11) y se prevé la extensión.",
+   "efecto": "Define el alcance de REQ-F-19 y la lista de preguntas del README (REQ-D-07 b, e). Condiciona DEC-26 a DEC-33.",
+   "multiple": false,
+   "orden": 1
+  },
+  {
+   "id": "DEC-26",
+   "grupo": "E",
+   "titulo": "Umbral de cambio sin costo por retraso: 180 min (PDF) vs 31 min (la aerolínea)",
+   "tipo": "EXTERNA",
+   "pregunta": "¿Se sigue R1 (≥ 180 min) o se adopta el umbral comercial de la aerolínea (≥ 31 min)?",
+   "contexto": "R1 otorga REBOOK_NO_FEE desde 180 min. la aerolínea (artículos de Uruguay y página de Chile) lo da desde 31 min de retraso, y devolución si el atraso supera 3 h y el pasajero no vuela. En el caso base el retraso es de 160 min: R1 no se cumple, pero la política comercial sí daría cambio.",
+   "traz": {
+    "src": [
+     "SRC-03-03",
+     "SRC-04-12"
+    ],
+    "req": [
+     "REQ-F-11",
+     "REQ-F-18"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-02"
+    ],
+    "dat": [
+     "DAT-46",
+     "DAT-55"
+    ],
+    "pol": [
+     "POL-UY-01",
+     "POL-CL-02",
+     "POL-CL-03"
+    ]
+   },
+   "referencias": [
+    {
+     "etiqueta": "POL-UY-01",
+     "archivo": "05_Politicas_Externas/01_Uruguay_articulos_centro_ayuda.md",
+     "resumen": "Retraso de 31 min o más y no conforme: cambio sin costo (mismo destino y cabina, 12 meses) o devolución sin cargo."
+    },
+    {
+     "etiqueta": "POL-CL-02",
+     "archivo": "05_Politicas_Externas/03_Chile_conoce-tus-derechos.md",
+     "resumen": "Atraso de más de 3 h y decide no volar: devolución de pasaje y tasas."
+    },
+    {
+     "etiqueta": "POL-CL-03",
+     "archivo": "05_Politicas_Externas/03_Chile_conoce-tus-derechos.md",
+     "resumen": "Desde 31 min de atraso: cambio (fecha, hora o destino, misma cabina) o devolución."
+    },
+    {
+     "etiqueta": "MATRIZ",
+     "archivo": "05_Politicas_Externas/15_Matriz_comparativa.md",
+     "resumen": "Comparación por tema entre todas las fuentes y las reglas del PDF."
+    }
+   ],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Seguir R1 como regla del producto y documentar la discrepancia",
+     "detalle": "El README registra que la política comercial publicada es más favorable y plantea la pregunta a Producto/Legal.",
+     "pros": "Respeta la fuente de verdad del PDF.",
+     "contras": "Puede decir «no corresponde» donde la aerolínea sí ofrece cambio.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Adoptar 31 min en lugar de R1",
+     "detalle": "Se reemplaza el umbral.",
+     "pros": "Más favorable al pasajero.",
+     "contras": "Contradice `get_policy_rules`; dato externo sin validar.",
+     "externas": true
+    },
+    {
+     "id": "c",
+     "titulo": "Escalar a humano entre 31 y 179 min",
+     "detalle": "Sin R1 ni R3, un agente confirma.",
+     "pros": "No promete ni niega.",
+     "contras": "Más casos humanos.",
+     "externas": true
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "En el caso base lo que otorga el cambio sin costo es R3 (conexión), no R1; la discrepancia se declara sin alterar la política del PDF.",
+   "efecto": "Fija el umbral de REQ-F-11 y su justificación; relacionado con DEC-05.",
+   "multiple": false,
+   "orden": 2
+  },
+  {
+   "id": "DEC-27",
+   "grupo": "E",
+   "titulo": "Asistencia durante la espera (comunicación, comida, alojamiento, traslado)",
+   "tipo": "EXTERNA",
+   "pregunta": "¿Qué se dice sobre asistencia si la política del PDF solo tiene un vale de comida a ≥ 240 min internacional?",
+   "contexto": "Con 160 min de retraso R2 no aplica, pero Chile da alimentación a más de 2 h, y O1 obliga a pernoctar en Lima con un niño de 7 años (Chile y la Decisión 619 dan alojamiento y traslado en esos casos). Las reglas del PDF no tienen regla de alojamiento.",
+   "traz": {
+    "src": [
+     "SRC-03-03"
+    ],
+    "req": [
+     "REQ-F-18",
+     "REQ-F-03"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-03"
+    ],
+    "dat": [
+     "DAT-39",
+     "DAT-55"
+    ],
+    "pol": [
+     "POL-CL-01",
+     "POL-CL-04",
+     "POL-PE-07",
+     "POL-CO-04",
+     "POL-UYN-02",
+     "POL-AR-03"
+    ]
+   },
+   "referencias": [
+    {
+     "etiqueta": "POL-CL-01",
+     "archivo": "05_Politicas_Externas/03_Chile_conoce-tus-derechos.md",
+     "resumen": "Atraso en aeropuerto: más de 1 h conectividad; más de 2 h alimentación (y cada 3 h); más de 4 h de noche alojamiento y transporte; más de 11 h de día transporte. Excepto clima, fuerza mayor o caso fortuito."
+    },
+    {
+     "etiqueta": "POL-CL-04",
+     "archivo": "05_Politicas_Externas/03_Chile_conoce-tus-derechos.md",
+     "resumen": "Reprogramación o cancelación: reubicación, cambio sin cargo ni diferencia tarifaria, devolución si espera más de 3 h; alojamiento si hay que pernoctar."
+    },
+    {
+     "etiqueta": "POL-PE-07",
+     "archivo": "05_Politicas_Externas/04_Peru_Decision_619_CAN.md",
+     "resumen": "Art. 8: retraso más de 2 h refrigerio y llamada; más de 4 h comida; más de 6 h compensación mínima 25 % y hospedaje o reembolso; cancelación; sobreventa; conexiones."
+    },
+    {
+     "etiqueta": "POL-CO-04",
+     "archivo": "05_Politicas_Externas/05_Colombia.md",
+     "resumen": "Demora: más de 1 h refrigerio; más de 3 h comida; más de 5 h compensación de al menos 30 % (no si sale antes de 6 h)."
+    },
+    {
+     "etiqueta": "POL-UYN-02",
+     "archivo": "05_Politicas_Externas/06_Uruguay_cartilla_DINACIA.md",
+     "resumen": "Espera de más de 4 h: comidas, alojamiento y transporte; no aplica por clima."
+    },
+    {
+     "etiqueta": "POL-AR-03",
+     "archivo": "05_Politicas_Externas/07_Argentina_ANAC.md",
+     "resumen": "Demoras: hasta 4 h nada (salvo 00-06 h comidas); 4-8 h comidas; más de 8 h comidas, alojamiento y traslado."
+    },
+    {
+     "etiqueta": "MATRIZ",
+     "archivo": "05_Politicas_Externas/15_Matriz_comparativa.md",
+     "resumen": "Comparación por tema entre todas las fuentes y las reglas del PDF."
+    }
+   ],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Solo lo que devuelve la política (R2)",
+     "detalle": "No se menciona otra asistencia.",
+     "pros": "Coherente con el PDF.",
+     "contras": "Silencia un pernocte que existe.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Mensaje genérico + caso humano si hay pernocte",
+     "detalle": "«Podrías tener derecho a asistencia; un agente lo confirmará», sin cifras; se abre caso humano por el pernocte.",
+     "pros": "No inventa umbrales ni calla el pernocte.",
+     "contras": "No resuelve el detalle de inmediato.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Incorporar umbrales de Chile como reglas adicionales",
+     "detalle": "Más de 2 h comida; más de 4 h de noche alojamiento.",
+     "pros": "Cercano a la ley.",
+     "contras": "Depende de DEC-25; datos con anomalías de la fuente.",
+     "externas": true
+    }
+   ],
+   "rec": [
+    "b"
+   ],
+   "razon": "El pernocte es un hecho derivable de los datos (O1 sale al día siguiente); decirlo sin cifras ni promesas es veraz.",
+   "efecto": "Añade a REQ-F-18/REQ-F-03 la mención cautelosa de asistencia y el disparador de caso humano por pernocte (REQ-F-14).",
+   "multiple": false,
+   "orden": 3
+  },
+  {
+   "id": "DEC-28",
+   "grupo": "E",
+   "titulo": "Reembolso, tarifas no reembolsables y plazos",
+   "tipo": "EXTERNA",
+   "pregunta": "¿Qué se dice de la opción de reembolso (O3) si no hay regla ni monto y la tarifa es «no reembolsable»?",
+   "contexto": "`refundable:false` describe cambios voluntarios; en una modificación hecha por la aerolínea la aerolínea da derecho de devolución, y siempre devuelve las tasas de embarque. La Decisión 619 fija 5 días hábiles; Chile 10 días hábiles en sobreventa. La política `POL-REFUND-2026-01` citada por O3 no se recuperó.",
+   "traz": {
+    "src": [
+     "SRC-03-02",
+     "SRC-02-07"
+    ],
+    "req": [
+     "REQ-F-18",
+     "REQ-F-03"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-04",
+     "GAP-10"
+    ],
+    "dat": [
+     "DAT-11",
+     "DAT-33"
+    ],
+    "pol": [
+     "POL-CL-07",
+     "POL-CL-16",
+     "POL-PE-10",
+     "POL-UY-03"
+    ]
+   },
+   "referencias": [
+    {
+     "etiqueta": "POL-CL-07",
+     "archivo": "05_Politicas_Externas/03_Chile_conoce-tus-derechos.md",
+     "resumen": "Pérdida de conexión en la misma reserva: reubicación, cambio sin cargo ni diferencia tarifaria, devolución si decide no volar."
+    },
+    {
+     "etiqueta": "POL-CL-16",
+     "archivo": "05_Politicas_Externas/03_Chile_conoce-tus-derechos.md",
+     "resumen": "Las tasas de embarque siempre son reembolsables; las tarifas baratas no admiten cambio ni devolución voluntaria; se evalúa por segmento."
+    },
+    {
+     "etiqueta": "POL-PE-10",
+     "archivo": "05_Politicas_Externas/04_Peru_Decision_619_CAN.md",
+     "resumen": "Art. 11: reembolso dentro de 5 días hábiles."
+    },
+    {
+     "etiqueta": "POL-UY-03",
+     "archivo": "05_Politicas_Externas/01_Uruguay_articulos_centro_ayuda.md",
+     "resumen": "Cancelación: alternativa, nueva fecha sin costo o devolución total (incluye tasas)."
+    },
+    {
+     "etiqueta": "MATRIZ",
+     "archivo": "05_Politicas_Externas/15_Matriz_comparativa.md",
+     "resumen": "Comparación por tema entre todas las fuentes y las reglas del PDF."
+    }
+   ],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Mencionar que existe la vía de reembolso, sin monto ni plazo, y derivar",
+     "detalle": "No se usa `refundable:false` para negar; el detalle lo confirma un agente.",
+     "pros": "Veraz; no promete.",
+     "contras": "El pasajero no ve montos.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Omitir O3 hasta tener política recuperable",
+     "detalle": "No se menciona el reembolso.",
+     "pros": "No afirma nada no verificable.",
+     "contras": "Oculta un derecho probable.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Incluir plazos y reglas de las normas",
+     "detalle": "Cinco días hábiles, 10 días hábiles, devolución de tasas.",
+     "pros": "Informativo.",
+     "contras": "Depende de DEC-25; datos externos.",
+     "externas": true
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Es veraz con la evidencia disponible y no usa la tarifa voluntaria como excusa.",
+   "efecto": "Define el tratamiento de O3 en REQ-F-20 y el contenido de REQ-F-03; marca GAP-04 y GAP-10 como pregunta abierta.",
+   "multiple": false,
+   "orden": 4
+  },
+  {
+   "id": "DEC-29",
+   "grupo": "E",
+   "titulo": "Compensación económica (R4)",
+   "tipo": "EXTERNA",
+   "pregunta": "¿Cuándo y cómo se habla de compensación económica?",
+   "contexto": "R4 solo es una bandera (`compensation_requested`), requiere humano y no trae montos. Las normas externas fijan porcentajes distintos (25 % CAN, 30 % Colombia, tablas en UF en Chile para sobreventa, euros en la UE).",
+   "traz": {
+    "src": [
+     "SRC-03-03",
+     "SRC-04-06"
+    ],
+    "req": [
+     "REQ-F-17"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-05"
+    ],
+    "dat": [
+     "DAT-50"
+    ],
+    "pol": [
+     "POL-PE-07",
+     "POL-CO-04",
+     "POL-CO-05",
+     "POL-EC-01",
+     "POL-CL-06"
+    ]
+   },
+   "referencias": [
+    {
+     "etiqueta": "POL-PE-07",
+     "archivo": "05_Politicas_Externas/04_Peru_Decision_619_CAN.md",
+     "resumen": "Art. 8: retraso más de 2 h refrigerio y llamada; más de 4 h comida; más de 6 h compensación mínima 25 % y hospedaje o reembolso; cancelación; sobreventa; conexiones."
+    },
+    {
+     "etiqueta": "POL-CO-04",
+     "archivo": "05_Politicas_Externas/05_Colombia.md",
+     "resumen": "Demora: más de 1 h refrigerio; más de 3 h comida; más de 5 h compensación de al menos 30 % (no si sale antes de 6 h)."
+    },
+    {
+     "etiqueta": "POL-CO-05",
+     "archivo": "05_Politicas_Externas/05_Colombia.md",
+     "resumen": "Cancelación: devolución más compensación de al menos 30 % y hospedaje."
+    },
+    {
+     "etiqueta": "POL-EC-01",
+     "archivo": "05_Politicas_Externas/10_Ecuador.md",
+     "resumen": "Ecuador (fuente secundaria): compensación mínima de 25 % del trayecto; las fuentes discrepan en los tramos."
+    },
+    {
+     "etiqueta": "POL-CL-06",
+     "archivo": "05_Politicas_Externas/03_Chile_conoce-tus-derechos.md",
+     "resumen": "Sobreventa: opciones, devolución en 10 días hábiles y compensación en UF (la tabla tiene una fila anómala)."
+    },
+    {
+     "etiqueta": "MATRIZ",
+     "archivo": "05_Politicas_Externas/15_Matriz_comparativa.md",
+     "resumen": "Comparación por tema entre todas las fuentes y las reglas del PDF."
+    }
+   ],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Nunca proactivo; solo si el pasajero lo pide; sin montos; caso humano",
+     "detalle": "Se cumple R4: se abre caso humano.",
+     "pros": "Evita promesas y errores.",
+     "contras": "El pasajero no recibe información proactiva.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Informar proactivamente que podría haber compensación",
+     "detalle": "Mencionar sin cifras.",
+     "pros": "Transparente.",
+     "contras": "Riesgo de promesa; depende de la causa (GAP-06).",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Calcular montos con normas externas",
+     "detalle": "Usar CAN 25 %, etc.",
+     "pros": "Informativo.",
+     "contras": "Contradice la regla; sin jurisdicción ni causa.",
+     "externas": true
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Emitir una compensación es de alto impacto (SRC-04-06) y no hay base de montos en el PDF.",
+   "efecto": "Fija el control de REQ-F-17 para compensación y el disparador de REQ-F-14.",
+   "multiple": false,
+   "orden": 5
+  },
+  {
+   "id": "DEC-30",
+   "grupo": "E",
+   "titulo": "Causa del evento y exenciones (clima, fuerza mayor)",
+   "tipo": "EXTERNA",
+   "pregunta": "¿Cómo se trata que el evento no traiga causa si muchas normas la usan para conceder o negar derechos?",
+   "contexto": "Chile no da servicios por clima, fuerza mayor o caso fortuito; la Decisión 619 exige que la autoridad verifique esas causas; la UE habla de circunstancias extraordinarias. El evento DELAY no trae causa.",
+   "traz": {
+    "src": [
+     "SRC-02-08"
+    ],
+    "req": [
+     "REQ-F-18",
+     "REQ-F-16"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-06"
+    ],
+    "dat": [
+     "DAT-22",
+     "DAT-49"
+    ],
+    "pol": [
+     "POL-CL-01",
+     "POL-PE-06",
+     "POL-UE-03"
+    ]
+   },
+   "referencias": [
+    {
+     "etiqueta": "POL-CL-01",
+     "archivo": "05_Politicas_Externas/03_Chile_conoce-tus-derechos.md",
+     "resumen": "Atraso en aeropuerto: más de 1 h conectividad; más de 2 h alimentación (y cada 3 h); más de 4 h de noche alojamiento y transporte; más de 11 h de día transporte. Excepto clima, fuerza mayor o caso fortuito."
+    },
+    {
+     "etiqueta": "POL-PE-06",
+     "archivo": "05_Politicas_Externas/04_Peru_Decision_619_CAN.md",
+     "resumen": "Art. 7: cancelación; liberación si avisó con 15 días o más; causas no imputables solo si las verifica la autoridad nacional."
+    },
+    {
+     "etiqueta": "POL-UE-03",
+     "archivo": "05_Politicas_Externas/02_Union_Europea_Reg_261-2004.md",
+     "resumen": "UE: cancelación; adelanto de más de 1 h se considera cancelación; compensación salvo aviso de 14 días o circunstancias extraordinarias."
+    },
+    {
+     "etiqueta": "CRUCE",
+     "archivo": "05_Politicas_Externas/16_Referencias_cruzadas.md",
+     "resumen": "Qué política toca qué brecha, requerimiento y decisión."
+    }
+   ],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Tratar como «causa no informada»",
+     "detalle": "No afirmar ni negar derechos que dependan de la causa; mensaje neutral; escalar los casos donde la causa cambiaría el derecho; documentar la brecha.",
+     "pros": "Veraz.",
+     "contras": "Menos específico.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Inferir la causa",
+     "detalle": "Deducirla de otros eventos.",
+     "pros": "Más información.",
+     "contras": "Especulativo.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Pedir un campo `cause` (extensión del contrato)",
+     "detalle": "Proponer ese campo en `get_operational_events`.",
+     "pros": "Soluciona la raíz.",
+     "contras": "Cambia el contrato; es una recomendación al equipo.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "No hay dato para otra cosa; se sugiere c como siguiente paso en el README.",
+   "efecto": "Añade la regla DQ-29 a REQ-F-18/REQ-F-16 y una pregunta abierta en REQ-D-07.",
+   "multiple": false,
+   "orden": 6
+  },
+  {
+   "id": "DEC-31",
+   "grupo": "E",
+   "titulo": "Cancelaciones, adelantos y otros eventos",
+   "tipo": "EXTERNA",
+   "pregunta": "¿El slice cubre solo retrasos o también cancelación y adelanto?",
+   "contexto": "El PDF habla de «modificación» (SRC-01-09) pero solo muestra DELAY, GATE_CHANGE y STATUS, y una política DELAY. la aerolínea trata los adelantos desde 16 min; Colombia y la UE desde más de 1 h; las políticas de cancelación existen en varias normas.",
+   "traz": {
+    "src": [
+     "SRC-01-09",
+     "SRC-03-03"
+    ],
+    "req": [
+     "REQ-F-00",
+     "REQ-F-02"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-07"
+    ],
+    "dat": [
+     "DAT-18",
+     "DAT-50"
+    ],
+    "pol": [
+     "POL-UY-02",
+     "POL-UY-03",
+     "POL-CO-07",
+     "POL-UE-03"
+    ]
+   },
+   "referencias": [
+    {
+     "etiqueta": "POL-UY-02",
+     "archivo": "05_Politicas_Externas/01_Uruguay_articulos_centro_ayuda.md",
+     "resumen": "Adelanto de 16 min o más: mismas opciones que el retraso."
+    },
+    {
+     "etiqueta": "POL-UY-03",
+     "archivo": "05_Politicas_Externas/01_Uruguay_articulos_centro_ayuda.md",
+     "resumen": "Cancelación: alternativa, nueva fecha sin costo o devolución total (incluye tasas)."
+    },
+    {
+     "etiqueta": "POL-CO-07",
+     "archivo": "05_Politicas_Externas/05_Colombia.md",
+     "resumen": "Adelanto de más de 1 h: devolución o siguiente vuelo."
+    },
+    {
+     "etiqueta": "POL-UE-03",
+     "archivo": "05_Politicas_Externas/02_Union_Europea_Reg_261-2004.md",
+     "resumen": "UE: cancelación; adelanto de más de 1 h se considera cancelación; compensación salvo aviso de 14 días o circunstancias extraordinarias."
+    },
+    {
+     "etiqueta": "MATRIZ",
+     "archivo": "05_Politicas_Externas/15_Matriz_comparativa.md",
+     "resumen": "Comparación por tema entre todas las fuentes y las reglas del PDF."
+    }
+   ],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Solo DELAY; el resto degrada a humano",
+     "detalle": "Se reconocen GATE_CHANGE y STATUS; cualquier otro tipo (cancelación, adelanto) escala.",
+     "pros": "Honesto sobre el alcance; coherente con DEC-04.",
+     "contras": "No cubre cancelaciones.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Incluir cancelación y adelanto con política mock",
+     "detalle": "Se simula `get_policy_rules('CANCELLATION')`.",
+     "pros": "Más amplio.",
+     "contras": "Se inventa política y datos.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Incluirlos con umbrales de la aerolínea",
+     "detalle": "Por ejemplo 16 min para adelanto.",
+     "pros": "Cercano a la práctica.",
+     "contras": "Información externa sin validar.",
+     "externas": true
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "No hay datos ni política en el PDF para esos casos; declararlos fuera de alcance es lo defendible.",
+   "efecto": "Delimita REQ-F-00 y deja GAP-07 documentado como próximo paso.",
+   "multiple": false,
+   "orden": 7
+  },
+  {
+   "id": "DEC-32",
+   "grupo": "E",
+   "titulo": "Definición de «menor» (R5) y derechos asociados",
+   "tipo": "EXTERNA",
+   "pregunta": "¿Qué es un menor para activar R5?",
+   "contexto": "R5 no define edad. En el ejemplo P2 es `type: CHILD`, 7 años. Chile da asientos contiguos hasta los 14 años; la Decisión 619 y Uruguay tratan como especiales a los menores de 5.",
+   "traz": {
+    "src": [
+     "SRC-03-03"
+    ],
+    "req": [
+     "REQ-F-14",
+     "REQ-F-17"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-08"
+    ],
+    "dat": [
+     "DAT-03",
+     "DAT-45"
+    ],
+    "pol": [
+     "POL-CL-13",
+     "POL-PE-02",
+     "POL-UYN-04"
+    ]
+   },
+   "referencias": [
+    {
+     "etiqueta": "POL-CL-13",
+     "archivo": "05_Politicas_Externas/03_Chile_conoce-tus-derechos.md",
+     "resumen": "Menores de 14 años: asientos contiguos a un adulto de su familia o de la misma reserva."
+    },
+    {
+     "etiqueta": "POL-PE-02",
+     "archivo": "05_Politicas_Externas/04_Peru_Decision_619_CAN.md",
+     "resumen": "Definiciones: niños menores de 5 años son usuarios con necesidades especiales; valor neto sin tasas ni impuestos."
+    },
+    {
+     "etiqueta": "POL-UYN-04",
+     "archivo": "05_Politicas_Externas/06_Uruguay_cartilla_DINACIA.md",
+     "resumen": "Menores de 5 años, personas con discapacidad o mayores de 70: embarque preferente."
+    },
+    {
+     "etiqueta": "MATRIZ",
+     "archivo": "05_Politicas_Externas/15_Matriz_comparativa.md",
+     "resumen": "Comparación por tema entre todas las fuentes y las reglas del PDF."
+    }
+   ],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "`type == CHILD` (el dato del sistema)",
+     "detalle": "Se usa la clasificación que ya trae la reserva.",
+     "pros": "No inventa edades; simple.",
+     "contras": "Depende de cómo clasifique el sistema de reservas.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Menor de 18 años",
+     "detalle": "Criterio general de minoría de edad.",
+     "pros": "Conservador.",
+     "contras": "Requiere la edad; los adultos no la traen.",
+     "externas": true
+    },
+    {
+     "id": "c",
+     "titulo": "Menor de 14 años",
+     "detalle": "Criterio chileno de asientos contiguos.",
+     "pros": "Cercano a una norma.",
+     "contras": "Depende de jurisdicción (DEC-25).",
+     "externas": true
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Usa el dato disponible sin importar una edad externa.",
+   "efecto": "Fija la variable `group_includes_minor` de REQ-F-14/REQ-F-17 (REQ-F-30d).",
+   "multiple": false,
+   "orden": 8
+  },
+  {
+   "id": "DEC-33",
+   "grupo": "E",
+   "titulo": "Plazo y contenido de la notificación al pasajero",
+   "tipo": "EXTERNA",
+   "pregunta": "¿Qué debe contener el mensaje y con cuánta anticipación se avisa?",
+   "contexto": "El PDF solo exige `policy_ref` y que no haya información no validada. La Decisión 619 pide avisar al menos 4 h antes y dar información preferentemente escrita de derechos; Colombia 24 h; Bolivia 4/12 h. En el ejemplo, el retraso se registró ~6 h 42 min antes de la salida original.",
+   "traz": {
+    "src": [
+     "SRC-02-05",
+     "SRC-04-03"
+    ],
+    "req": [
+     "REQ-F-03",
+     "REQ-F-16"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-09"
+    ],
+    "dat": [
+     "DAT-65"
+    ],
+    "pol": [
+     "POL-PE-03",
+     "POL-CO-02",
+     "POL-BO-01"
+    ]
+   },
+   "referencias": [
+    {
+     "etiqueta": "POL-PE-03",
+     "archivo": "05_Politicas_Externas/04_Peru_Decision_619_CAN.md",
+     "resumen": "Art. 4: informar cambios al menos 4 h antes; información preferentemente escrita de derechos ante retraso, cancelación o sobreventa."
+    },
+    {
+     "etiqueta": "POL-CO-02",
+     "archivo": "05_Politicas_Externas/05_Colombia.md",
+     "resumen": "Informar cambios por el medio más rápido, a más tardar 24 h antes."
+    },
+    {
+     "etiqueta": "POL-BO-01",
+     "archivo": "05_Politicas_Externas/09_Bolivia.md",
+     "resumen": "Avisar cambios al menos 4 h antes (nacional) o 12 h (internacional)."
+    },
+    {
+     "etiqueta": "MATRIZ",
+     "archivo": "05_Politicas_Externas/15_Matriz_comparativa.md",
+     "resumen": "Comparación por tema entre todas las fuentes y las reglas del PDF."
+    }
+   ],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Mensaje con qué cambió (con hora), qué implica, siguiente paso, `policy_ref`, aviso de estimación y vía humana; sin plazos legales",
+     "detalle": "No se codifican plazos legales en v1; se documentan como referencia.",
+     "pros": "Cumple el PDF sin importar normas.",
+     "contras": "No garantiza cumplir plazos de una norma si aplicara.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Además información escrita de derechos y alerta si faltan menos de 4 h",
+     "detalle": "Incorpora el art. 4 de la Decisión 619.",
+     "pros": "Más completo.",
+     "contras": "Depende de DEC-25.",
+     "externas": true
+    },
+    {
+     "id": "c",
+     "titulo": "Solo el estado",
+     "detalle": "Mensaje mínimo.",
+     "pros": "Muy simple.",
+     "contras": "No cumple 'siguiente paso' (SRC-01-10).",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Cumple los requisitos del PDF y deja los plazos legales como referencia para la jurisdicción (DEC-25).",
+   "efecto": "Define el contenido mínimo del mensaje de REQ-F-03/REQ-F-16 y la especificación de REQ-F-09.",
+   "multiple": false,
+   "orden": 9
+  },
+  {
+   "id": "DEC-34",
+   "grupo": "E",
+   "titulo": "México y otros países fuera de la fuente",
+   "tipo": "EXTERNA",
+   "pregunta": "¿Qué se hace con México, que no figura en la lista de países de la aerolínea?",
+   "contexto": "El destino final del caso es México. La lista de 17 países de la página de la aerolínea no lo incluye; no hay fuente en esta carpeta.",
+   "traz": {
+    "src": [],
+    "req": [
+     "REQ-F-00"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-14"
+    ],
+    "dat": [],
+    "pol": []
+   },
+   "referencias": [
+    {
+     "etiqueta": "LEEME",
+     "archivo": "05_Politicas_Externas/00_LEEME_Politicas.md",
+     "resumen": "Estado de captura de cada fuente y qué país importa para el caso (§3)."
+    },
+    {
+     "etiqueta": "CRUCE",
+     "archivo": "05_Politicas_Externas/16_Referencias_cruzadas.md",
+     "resumen": "Qué política toca qué brecha, requerimiento y decisión."
+    }
+   ],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Fuera de alcance de v1; pregunta documentada",
+     "detalle": "Se registra como pregunta para Producto/Legal.",
+     "pros": "Honesto; sin inventar.",
+     "contras": "Sin información de México.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Investigar la normativa mexicana como insumo adicional",
+     "detalle": "Una nueva ronda de recopilación.",
+     "pros": "Más completo.",
+     "contras": "No hay garantía de que el producto la use; fuera de la fuente indicada.",
+     "externas": true
+    },
+    {
+     "id": "c",
+     "titulo": "Asumir equivalencia con la política del PDF",
+     "detalle": "Misma regla para todo.",
+     "pros": "Simple.",
+     "contras": "Sin base.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "La fuente que indicaste no cubre México y el PDF no lo pide.",
+   "efecto": "Queda como pregunta abierta en REQ-D-07 (b, e).",
+   "multiple": false,
+   "orden": 10
+  },
+  {
+   "id": "DEC-36",
+   "grupo": "F",
+   "titulo": "Idioma, tono y localización de mensajes",
+   "tipo": "INTERNA",
+   "pregunta": "¿En qué idioma y con qué formato se redactan los mensajes al pasajero?",
+   "contexto": "El ejemplo tiene teléfono +56, tarifa en CLP y nombres en español; el PDF indica idioma es-CL en su metadata. No hay requisito de idioma en el texto.",
+   "traz": {
+    "src": [
+     "SRC-01-14"
+    ],
+    "req": [
+     "REQ-F-03"
+    ],
+    "amb": [],
+    "gap": [
+     "GAP-22"
+    ],
+    "dat": [],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Español (es-CL) con plantillas y formato local",
+     "detalle": "Moneda CLP sin decimales; horas con zona o aeropuerto de referencia.",
+     "pros": "Coherente con los datos.",
+     "contras": "Un solo idioma.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "Multiidioma",
+     "detalle": "Plantillas por idioma.",
+     "pros": "Más alcance.",
+     "contras": "Fuera de v1.",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Español neutro sin localización",
+     "detalle": "Texto genérico.",
+     "pros": "Simple.",
+     "contras": "Menos preciso con moneda y horas.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a"
+   ],
+   "razon": "Es lo que sugieren los datos del ejemplo.",
+   "efecto": "Define la especificación del mensaje de REQ-F-03/REQ-F-09.",
+   "multiple": false,
+   "orden": 36
+  },
+  {
+   "id": "DEC-37",
+   "grupo": "F",
+   "titulo": "Uso de IA en este trabajo y confidencialidad del enunciado",
+   "tipo": "INTERNA",
+   "pregunta": "¿Qué registras sobre el uso de IA y cómo tratas el PDF marcado «Uso interno»? (selección múltiple)",
+   "contexto": "El PDF permite usar IA libremente pero exige transparencia en el Entregable 3 (SRC-06-05, SRC-05-04) y está marcado «Uso interno» en todas sus páginas (SRC-00-01).",
+   "traz": {
+    "src": [
+     "SRC-06-05",
+     "SRC-05-04",
+     "SRC-00-01"
+    ],
+    "req": [
+     "REQ-P-10",
+     "REQ-P-12",
+     "REQ-D-08",
+     "REQ-N-10"
+    ],
+    "amb": [],
+    "gap": [],
+    "dat": [],
+    "pol": []
+   },
+   "referencias": [],
+   "opciones": [
+    {
+     "id": "a",
+     "titulo": "Registrar el uso de IA para el Entregable 3",
+     "detalle": "Herramientas (p. ej. Claude Code y el método ESF), para qué se usaron, qué se aceptó, rechazó o modificó, cómo se validó, decisiones personales y qué nunca se envía a un modelo.",
+     "pros": "Cumple SRC-05-04 y SRC-06-05.",
+     "contras": "Requiere llevar el registro.",
+     "externas": false
+    },
+    {
+     "id": "b",
+     "titulo": "No publicar los artefactos fuera de tu entorno",
+     "detalle": "Los documentos generados se mantienen locales; no se suben a servicios externos ni se comparten públicamente.",
+     "pros": "Respeta la marca «Uso interno».",
+     "contras": "—",
+     "externas": false
+    },
+    {
+     "id": "c",
+     "titulo": "Consultar a quien envió el desafío",
+     "detalle": "Confirmar si hay restricciones adicionales de confidencialidad.",
+     "pros": "Certeza.",
+     "contras": "Costo de coordinación; el PDF ya permite IA.",
+     "externas": false
+    }
+   ],
+   "rec": [
+    "a",
+    "b"
+   ],
+   "razon": "a es obligatoria; b es una precaución barata coherente con la marca de confidencialidad.",
+   "efecto": "Fija el contenido de REQ-D-08 y el tratamiento de REQ-P-12/REQ-N-10.",
+   "multiple": true,
+   "orden": 37
+  }
+ ],
+ "dic": {
+  "req": {
+   "REQ-P-01": "El trabajo efectivo tiene un máximo de 3 horas e incluye análisis, implementación, validaciones y documentación.",
+   "REQ-P-02": "La propuesta se entrega dentro de 48 horas desde la recepción del documento (plazo disponible, no trabajo continuo).",
+   "REQ-P-03": "Las 3 horas pueden distribuirse en varias sesiones.",
+   "REQ-P-04": "El tiempo es un límite, no una meta: no se evalúa cuánto se produce.",
+   "REQ-P-05": "Habrá una sesión con un comité de 2 evaluadores de 40–45 min, dentro de las 48 h hábiles siguientes a la entrega.",
+   "REQ-P-06": "La sesión comienza con 10 min de presentación con el soporte que prefieras; no se exige presentación formal ni diapositivas; no se espera aplicación terminada ni despliegue.",
+   "REQ-P-07": "La presentación explica: entendimiento del problema, estructura de la solución, decisiones y supuestos, criterios de decisión y trade-offs relevantes (sin recorrer cada detalle).",
+   "REQ-P-08": "Preparar la defensa: el comité puede cuestionar decisiones y supuestos, explorar alternativas descartadas, plantear escenarios o cambiar restricciones y preguntar por riesgos y evolución; no requiere desarrollo nuevo.",
+   "REQ-P-09": "Formato y herramientas libres (repositorio, Markdown, PDF, documento, diagrama, demo); la estética no se evalúa; el contenido de los 3 entregables es obligatorio.",
+   "REQ-P-10": "Se puede usar IA libremente; se pide transparencia en el Entregable 3 y se conversará sobre decisiones concretas del proceso.",
+   "REQ-P-11": "Si el enunciado es insuficiente, documentar el supuesto y por qué.",
+   "REQ-P-12": "Tratar el documento como confidencial: cada página está marcada \"Uso interno\".",
+   "REQ-D-01": "Entregable 1 — Evidencia técnica: el vertical slice del track elegido más diseño/contrato/pseudocódigo de la capa complementaria. Debe permitir verificar al menos una decisión relevante del caso.",
+   "REQ-D-02": "El Entregable 1 indica el track elegido (Backend/Integración o Frontend/Experience) y por qué.",
+   "REQ-D-03": "El Entregable 1 incluye instrucciones para revisarlo o ejecutarlo.",
+   "REQ-D-04": "El Entregable 1 declara el alcance efectivamente implementado.",
+   "REQ-D-05": "El Entregable 1 lista tests o validaciones disponibles (y el slice incluye ≥ 1 validación o test).",
+   "REQ-D-06": "El Entregable 1 declara limitaciones conocidas.",
+   "REQ-D-07": "Entregable 2 — README de ingeniería (máx. 2 págs.): (a) problema entendido y outcome esperado; (b) supuestos y alcance; (c) decisiones principales y alternativas descartadas; (d) qué quedó determinístico / AI-assisted / agentic / human-controlled; (e) riesgos y próximos pasos; (f) cómo validaste.",
+   "REQ-D-08": "Entregable 3 — AI Usage & Decision Note (máx. 1 pág.): (a) herramientas de IA usadas y para qué; (b) outputs aceptados, rechazados o modificados y cómo se validaron; (c) decisiones tomadas personalmente; (d) qué información nunca se entregaría a un modelo.",
+   "REQ-D-09": "La clasificación de pasos (determinístico / AI-assisted / agentic / human) debe aparecer (en el README o en la presentación) con razón, riesgo y control/fallback. La tabla es opcional como formato.",
+   "REQ-D-10": "Los tres entregables son obligatorios en su contenido.",
+   "REQ-D-11": "Soporte de presentación (libre) que cubra REQ-P-07.",
+   "REQ-F-00": "Alcance v1: ayudar a pasajeros cuyo vuelo sufrió una modificación.",
+   "REQ-F-01": "El pasajero puede consultar el contexto de su viaje.",
+   "REQ-F-02": "El pasajero puede entender si hubo una modificación relevante y qué implica.",
+   "REQ-F-03": "El pasajero recibe una explicación o recomendación accionable (qué ocurrió y cuál es su siguiente paso).",
+   "REQ-F-04": "El pasajero puede ser derivado a una persona, o iniciar una acción controlada, cuando corresponda.",
+   "REQ-F-05": "Resolver el caso base: a partir de la información disponible (reserva + eventos + políticas), determinar qué ocurrió y qué corresponde ofrecer o comunicar.",
+   "REQ-F-06": "Diseñar el manejo de una consulta ambigua o compleja que combine reserva, eventos y políticas: cómo se descompone el trabajo, qué contexto se recupera, qué queda determinístico, qué se resuelve con IA o agente, y dónde se detiene para pedir intervención humana.",
+   "REQ-F-07": "[Opción A — Backend/Integración] Implementar la lógica del caso base como servicio o función invocable, con manejo de errores y ≥ 1 validación o test.",
+   "REQ-F-08": "[Opción B — Frontend/Experience] Implementar la pantalla o flujo del pasajero que consume datos equivalentes a los de las tools y muestra estado del viaje, alerta y recomendación, con ≥ 1 validación.",
+   "REQ-F-09": "Especificar (sin implementar) la capa complementaria: si el track fue Backend → cómo se vería/comunicaría al pasajero (pantalla, wireframe o especificación del mensaje); si fue Frontend → qué contrato/lógica de backend asume. Profundidad en un track; capacidad de diseñar la integración.",
+   "REQ-F-10": "Decidir y justificar el uso de IA en runtime; si no se incorpora, explicar qué beneficio se esperaba y por qué el riesgo, costo o complejidad no lo justifican.",
+   "REQ-F-11": "Definir qué se considera una modificación relevante (AMB-01).",
+   "REQ-F-12": "Definir qué información puede mostrarse al pasajero y cuál no (AMB-02).",
+   "REQ-F-13": "Definir en qué casos una recomendación puede entregarse de forma automática (AMB-03).",
+   "REQ-F-14": "Definir en qué casos debe intervenir una persona antes de actuar o comunicar (AMB-04).",
+   "REQ-F-15": "Definir qué hacer cuando las fuentes entregan información contradictoria (AMB-05).",
+   "REQ-F-16": "No entregar información no verificada al pasajero; notify_passenger no debe enviar información no validada.",
+   "REQ-F-17": "No ejecutar acciones de alto impacto sin los controles correspondientes (cambiar una reserva; emitir una compensación).",
+   "REQ-F-18": "Las recomendaciones deben ser exactas: una incorrecta genera costo, reclamo o incumplimiento de política.",
+   "REQ-F-19": "Usar reglas versionadas y verificables; el mensaje debe llevar policy_ref (el servicio rechaza con 422 UNVALIDATED_CONTENT si falta).",
+   "REQ-F-20": "Las opciones son candidatas, no una decisión final: el sistema selecciona y valida.",
+   "REQ-F-21": "Controlar timestamp, fuente y frescura de los eventos operacionales.",
+   "REQ-F-22": "Tolerar información parcial del contexto (completeness: PARTIAL) y declararla.",
+   "REQ-F-23": "Idempotencia en create_rebooking_request con idempotency_key.",
+   "REQ-F-24": "Manejar 409 DUPLICATE_REQUEST (existente) y 503 UPSTREAM_TIMEOUT (resultado indeterminado).",
+   "REQ-F-25": "Respetar la vigencia (TTL = 120 s) de las opciones; no actuar con opciones vencidas.",
+   "REQ-F-26": "Escalar a operación humana con razón y evidencia mediante create_human_case (cola DISRUPTION_L2, SLA 45 min en el ejemplo).",
+   "REQ-F-27": "Si se usan mocks propios, mantener los contratos de las tools.",
+   "REQ-F-28": "Trazabilidad: cada decisión/acción debe poder reconstruirse (datos usados con su retrieved_at, versión de política y rule_id, evento(s) elegido(s) y descartado(s), opción, acción, mensaje).",
+   "REQ-F-29": "Validar mensajes antes de notificar: además del policy_ref exigido por el servicio, un validador propio que verifique que cada afirmación tiene evidencia vigente.",
+   "REQ-F-30": "Resultado esperado del caso base ABC123 (hipótesis; sub-resultados F-30a…h).",
+   "REQ-N-01": "Los datos operacionales pueden estar desactualizados o ser contradictorios entre fuentes.",
+   "REQ-N-02": "Una recomendación incorrecta puede generar costo, reclamo o incumplimiento de política.",
+   "REQ-N-03": "Cambiar una reserva o emitir una compensación son acciones de alto impacto.",
+   "REQ-N-04": "Proteger datos personales y aplicar mínimo privilegio.",
+   "REQ-N-05": "La primera versión debe poder ser operada por un equipo pequeño.",
+   "REQ-N-06": "Considerar latencia, costo por interacción y dependencia de modelos.",
+   "REQ-N-07": "No existe una única solución correcta.",
+   "REQ-N-08": "Mantener exactitud, seguridad y trazabilidad.",
+   "REQ-N-09": "Resultado de negocio: reducir la incertidumbre del pasajero y los contactos evitables al call center. (No hay métrica definida.)",
+   "REQ-N-10": "Confidencialidad del documento (\"Uso interno\") y de los datos del caso.",
+   "REQ-C-01": "Contrato de get_trip_context(booking_id) — \"Puede devolver información parcial.\"",
+   "REQ-C-02": "Contrato de get_operational_events(segment_ids) — \"Requiere controlar timestamp, fuente y frescura.\"",
+   "REQ-C-03": "Contrato de get_eligible_options(trip_context) — \"Entrega opciones candidatas, no una decisión final.\"",
+   "REQ-C-04": "Contrato de get_policy_rules(scenario) — \"Reglas versionadas y verificables.\"",
+   "REQ-C-05": "Contrato de create_rebooking_request(option, idempotency_key) — \"Acción de alto impacto.\"",
+   "REQ-C-06": "Contrato de create_human_case(reason, evidence) — \"Escalamiento a operación humana.\"",
+   "REQ-C-07": "Contrato de notify_passenger(message) — \"No debe enviar información no validada.\"",
+   "REQ-C-08": "Contrato de (ejemplos)— — \"Estos ejemplos son representativos… Úsalos como base de trabajo.\"",
+   "REQ-E-01": "Pensamiento de producto: cómo entiendes y acotas, qué supuestos explicitas, qué priorizas y cómo lo medirías.",
+   "REQ-E-02": "Fundamentos de ingeniería: contratos, estados, errores, límites, integración.",
+   "REQ-E-03": "Desarrollo asistido por IA: controles, qué verificas, qué aceptas/corriges/rechazas.",
+   "REQ-E-04": "Calidad, seguridad y confiabilidad: comprobaciones, fallos, permisos, datos sensibles, operación.",
+   "REQ-E-05": "Priorización y evidencia: tiempo en lo importante, evidencia localizable, pendientes explícitos.",
+   "REQ-E-06": "Juicio técnico y trade-offs: alternativas, consecuencias, costos, riesgos, reversibilidad.",
+   "REQ-E-07": "Razonamiento agentic y control: dónde IA/agente vs. determinístico vs. humano; contexto, herramientas, permisos; dónde se detiene; cómo detectas un output incorrecto.",
+   "REQ-E-08": "Responsabilidad y adaptación: asumes el resultado, reconoces límites, revisas decisiones ante información nueva.",
+   "REQ-E-09": "Principio: se evalúa el criterio sobre el volumen; no hay una única solución correcta; no se penaliza: no terminar la capa complementaria, no usar IA en runtime, no usar MCP/framework, pseudocódigo no esencial, UI poco pulida, solución distinta, velocidad, conocimiento del dominio aéreo, estética, uso/no uso de IA por sí mismo."
+  },
+  "gap": {
+   "GAP-01": "Jurisdicción aplicable por segmento. Las reglas no traen país; S1 sale de Chile, S2 de Perú (Decisión 619 aplica a quien \"inicia\" el viaje en un país andino: ambiguo).",
+   "GAP-02": "Umbral de cambio sin costo por retraso: R1=180 min vs política la aerolínea 31 min.",
+   "GAP-03": "Asistencia durante la espera (comunicación, comida, alojamiento, traslado): el PDF solo tiene MEAL_VOUCHER a ≥240 min internacional.",
+   "GAP-04": "Reembolso: no hay regla (O3 usa POL-REFUND-2026-01, no recuperada); refundable:false.",
+   "GAP-05": "Compensación económica: R4 es solo una bandera; sin montos ni base.",
+   "GAP-06": "Causa del evento (clima, fuerza mayor, técnica, ATC): no existe y las normas la usan como exención.",
+   "GAP-07": "Otros eventos/escenarios: cancelación, adelanto, desvío, sobreventa no tienen política ni ejemplo; scenario sin enumerar.",
+   "GAP-08": "Definición de \"menor\" (edad) y derechos asociados.",
+   "GAP-09": "Plazo y contenido de la notificación al pasajero (aviso ≥ 4 h, información escrita de derechos).",
+   "GAP-10": "Plazos de reembolso/cambio (12 meses; 5 días hábiles; 10 días hábiles; 7/15/30 días).",
+   "GAP-11": "Tiempo mínimo de conexión (MCT) y terminales.",
+   "GAP-12": "Ciclo de vida del rebooking (PENDING_CONFIRMATION sin confirmar/consultar/cancelar; 503 sin reconciliación).",
+   "GAP-13": "notify_passenger: destinatario, canal, esquema del mensaje, idioma.",
+   "GAP-14": "México (destino final) no figura en la lista de países de la página de la aerolínea.",
+   "GAP-15": "Zonas horarias y fechas: horas locales sin offset; new_departure sin fecha; sin llegada nueva.",
+   "GAP-16": "Precedencia de fuentes y umbrales de frescura.",
+   "GAP-17": "Semántica de confidence y completeness; qué dato faltante bloquea qué decisión.",
+   "GAP-18": "Variables de política que no existen en los datos y gramática de condition.",
+   "GAP-19": "Semántica de los derechos (PRIORITY_HANDLING, CASH_COMPENSATION, MEAL_VOUCHER) y precedencia entre reglas (R3 vs R5).",
+   "GAP-20": "Grupo familiar y cabina: opciones sin mapa por pasajero ni cabina; \"mantener al menor con un adulto\".",
+   "GAP-21": "Autenticación del pasajero y control de acceso.",
+   "GAP-22": "Canal y forma de la \"consulta\" (chat, app, web; libre o estructurada) e idioma.",
+   "GAP-23": "Métricas de éxito (reducción de contactos, exactitud) y línea base.",
+   "GAP-24": "Presupuestos de latencia/costo/disponibilidad y modelo de operación.",
+   "GAP-25": "Vigencias incompatibles: TTL 2 min < expiración ≈ 9 min < SLA humano 45 min.",
+   "GAP-26": "Caso humano: esquema de reason/evidence, deduplicación y quién aprueba.",
+   "GAP-27": "Marco de protección de datos aplicable y retención de registros/logs."
+  },
+  "amb": {
+   "AMB-01": "¿Qué es una modificación relevante?",
+   "AMB-02": "¿Qué información se muestra al pasajero y cuál no?",
+   "AMB-03": "¿Cuándo una recomendación va automática?",
+   "AMB-04": "¿Cuándo interviene una persona antes de actuar/comunicar?",
+   "AMB-05": "¿Qué hacer con fuentes contradictorias?"
+  },
+  "dat": {
+   "DAT-01": "[ALTA] booking_id abre PII y no es una credencial",
+   "DAT-02": "[ALTA] Concentración de PII y propagación",
+   "DAT-03": "[ALTA] El menor (P2) cambia el tratamiento y casi no tiene datos",
+   "DAT-04": "[MEDIA] Campos opcionales según pasajero y ausencia de mapa pasajero↔segmento",
+   "DAT-05": "[ALTA] Horas locales sin zona horaria",
+   "DAT-06": "[MEDIA] No hay fecha de llegada",
+   "DAT-07": "[ALTA] La conexión es implícita",
+   "DAT-08": "[MEDIA] No hay cabina ni estado del ticket",
+   "DAT-09": "[ALTA] PARTIAL: qué bloquea cada dato faltante",
+   "DAT-10": "[BAJA] retrieved_at es de recuperación, no de validez",
+   "DAT-11": "[MEDIA] refundable:false / changeable:true describen cambios voluntarios",
+   "DAT-12": "[BAJA] Codificación y nombres",
+   "DAT-13": "[BAJA] flight_number",
+   "DAT-14": "[MEDIA] date repetida y atada a la hora",
+   "DAT-15": "[CRÍTICA] Contradicción en S1: ON_TIME vs DELAY",
+   "DAT-16": "[ALTA] event_id no ordena en el tiempo",
+   "DAT-17": "[ALTA] Frescura: no hay umbral y hay una espera oculta",
+   "DAT-18": "[ALTA] Payload polimórfico y tipos desconocidos",
+   "DAT-19": "[ALTA] delay_minutes mide la salida; no hay llegada",
+   "DAT-20": "[MEDIA] new_departure sin fecha ni zona",
+   "DAT-21": "[MEDIA] Redundancia new_departure / delay_minutes",
+   "DAT-22": "[ALTA] No hay causa del retraso",
+   "DAT-23": "[MEDIA] GATE_CHANGE es útil pero perecedero",
+   "DAT-24": "[ALTA] STATUS: SCHEDULED del S2 no prueba que la conexión se sostenga",
+   "DAT-25": "[MEDIA] Marcas de tiempo idénticas",
+   "DAT-26": "[MEDIA] sources_degraded es a nivel de consulta",
+   "DAT-27": "[MEDIA] Una fuente caída no deja rastro de evento",
+   "DAT-28": "[BAJA] Segmentos sin eventos",
+   "DAT-29": "[MEDIA] Dependencia del trip_context",
+   "DAT-30": "[BAJA] Los timestamps UTC son la parte inequívoca",
+   "DAT-31": "[CRÍTICA] O2 tiene 1 cupo para 2 pasajeros",
+   "DAT-32": "[ALTA] O2 cuesta 180.000 CLP pero el derecho es \"sin costo\"",
+   "DAT-33": "[ALTA] O3 (reembolso) es un cascarón",
+   "DAT-34": "[ALTA] policy_ref es un puntero que hay que verificar",
+   "DAT-35": "[ALTA] TTL de 120 s: las opciones envejecen más rápido que cualquier flujo humano",
+   "DAT-36": "[MEDIA] confidence no tiene definición",
+   "DAT-37": "[MEDIA] \"Elegible\" se calculó con datos parciales",
+   "DAT-38": "[MEDIA] Entrada con PII completa",
+   "DAT-39": "[MEDIA] O1 obliga a pernoctar en Lima",
+   "DAT-40": "[MEDIA] Moneda y formato del monto",
+   "DAT-41": "[MEDIA] No hay cabina ni clase",
+   "DAT-42": "[BAJA] Coincidencia 23:40",
+   "DAT-43": "[MEDIA] Las opciones son de la reserva, no por pasajero ni por segmento",
+   "DAT-44": "[BAJA] option_id local",
+   "DAT-45": "[CRÍTICA] Cuatro de las cinco variables no existen en los datos",
+   "DAT-46": "[CRÍTICA] En el caso base R1 no se cumple pero R3 sí",
+   "DAT-47": "[ALTA] R3 (\"sin aprobación\") y R5 (\"con aprobación\") chocan",
+   "DAT-48": "[ALTA] condition es texto: no se evalúa con eval",
+   "DAT-49": "[ALTA] Las reglas no tienen causa",
+   "DAT-50": "[ALTA] No hay reglas de reembolso, alojamiento, comunicación ni cuantía; solo DELAY",
+   "DAT-51": "[ALTA] No hay jurisdicción",
+   "DAT-52": "[MEDIA] Los \"derechos\" son etiquetas sin significado",
+   "DAT-53": "[MEDIA] Versionado: fijar la versión usada",
+   "DAT-54": "[MEDIA] delay_minutes: ¿de qué segmento, medido dónde y con qué borde?",
+   "DAT-55": "[MEDIA] R2 es más exigente que varias normas externas",
+   "DAT-56": "[BAJA] requires_human_approval sin quién ni cuándo",
+   "DAT-57": "[BAJA] Sin effective_to ni país",
+   "DAT-58": "[MEDIA] La política puede cambiar entre lectura y acción",
+   "DAT-59": "[CRÍTICA] 503: el resultado real es indeterminado",
+   "DAT-60": "[ALTA] 409 es \"ya existe\", no \"falló\"",
+   "DAT-61": "[ALTA] PENDING_CONFIRMATION sin forma de confirmar, consultar ni cancelar",
+   "DAT-62": "[ALTA] El rebooking no dice a quién ni en qué reserva",
+   "DAT-63": "[ALTA] Diseño de la idempotency_key",
+   "DAT-64": "[ALTA] create_human_case: sin llave, sin esquema, SLA largo",
+   "DAT-65": "[ALTA] notify_passenger: sin destinatario, QUEUED ≠ entregado, validación mínima",
+   "DAT-66": "[MEDIA] Modelo de errores incompleto",
+   "DAT-67": "[MEDIA] El comentario \"indeterminado\" no es dato",
+   "DAT-68": "[MEDIA] expires_at sin created_at",
+   "DAT-69": "[MEDIA] Estados sin enumerar",
+   "DAT-70": "[BAJA] Identificadores opacos",
+   "DAT-71": "[MEDIA] channel: PUSH depende de datos que no están",
+   "DAT-72": "[BAJA] DISRUPTION_L2",
+   "DAT-73": "[ALTA] Sin llaves de unión completas ni id de correlación (rebooking y notify no reciben booking/destinatario)",
+   "DAT-74": "[MEDIA] Las 4 lecturas caen en una ventana de 5 s; el riesgo es el tiempo entre lectura y acción",
+   "DAT-75": "[ALTA] El caso base descansa en 1 derivación crítica y 3 supuestos",
+   "DAT-76": "[ALTA] Cada variable derivada de política es una decisión con supuestos",
+   "DAT-77": "[ALTA] TTL de opciones (2 min) < expiración (≈9 min) < SLA humano (45 min)",
+   "DAT-78": "[MEDIA] Tres nombres de 'salida' y dos convenciones horarias",
+   "DAT-79": "[ALTA] Cinco campos PII en una lectura y el contrato fuerza su propagación",
+   "DAT-80": "[MEDIA] No hay identificador de correlación extremo a extremo",
+   "DAT-81": "[MEDIA] El ejemplo parece sintético (inconsistencias deliberadas o accidentales)",
+   "DAT-82": "[MEDIA] El ejemplo es un solo caso: no confundir ejemplo con esquema"
+  },
+  "src": {
+   "SRC-00-01": "\"Uso interno\" en **todas** las páginas",
+   "SRC-01-01": "\"Caso A — Disruption Companion\"",
+   "SRC-01-02": "\"Máximo 3 horas efectivas\"",
+   "SRC-01-03": "\"48 horas desde que recibes este documento (es el plazo disponible, no 48 horas de trabajo continuo)\"",
+   "SRC-01-04": "\"10 minutos de presentación + preguntas, profundización y debate técnico (40 a 45 minutos en total), dentro de las 48 horas hábiles siguientes a tu entrega, ante un comité de dos evaluadores\"",
+   "SRC-01-05": "\"Vertical slice técnico (track a elección) + README de ingeniería (2 pág.) + AI Usage & Decision Note (1 pág.) — Formato de entrega y soporte de presentación a tu elección\"",
+   "SRC-01-06": "\"No esperamos una aplicación terminada, ni despliegue, ni una presentación formal con diapositivas: presentarás tu propuesta en 10 minutos con el soporte que prefieras (ver sección 7).\"",
+   "SRC-01-07": "\"Este ejercicio no mide cuánto código produces: mide cómo diriges la construcción de una solución cuando la IA es parte activa de tu proceso de ingeniería.\"",
+   "SRC-01-08": "\"Un candidato que construye menos, pero demuestra mejor criterio, control del proceso y fundamentos sólidos, puede obtener una mejor evaluación que alguien que entrega una aplicación completa sin pode…",
+   "SRC-01-09": "\"Un equipo compacto —Product Manager, Product Designer, Engineering Team Lead y Software Engineer— está construyendo una funcionalidad para ayudar a pasajeros cuyo vuelo sufrió una modificación.\"",
+   "SRC-01-10": "\"El producto debe ayudar al pasajero a entender qué ocurrió y cuál es su siguiente paso, sin entregar información no verificada y sin ejecutar acciones de alto impacto sin los controles correspondient…",
+   "SRC-01-11": "\"Reducir la incertidumbre del pasajero y los contactos evitables al call center, manteniendo exactitud, seguridad y trazabilidad.\"",
+   "SRC-01-12": "\"consulte el contexto de su viaje;\"",
+   "SRC-01-13": "\"entienda si hubo una modificación relevante y qué implica;\"",
+   "SRC-01-14": "\"reciba una explicación o recomendación accionable;\"",
+   "SRC-01-15": "\"sea derivado a una persona, o inicie una acción controlada, cuando corresponda.\"",
+   "SRC-01-16": "\"Puedes asumir que existen interfaces equivalentes a las siguientes. No es obligatorio utilizarlas todas. Si trabajas con mocks propios, mantén estos contratos.\"",
+   "SRC-01-17": "`get_trip_context(booking_id)` — Lectura — \"Puede devolver información parcial.\"",
+   "SRC-01-18": "`get_operational_events(segment_ids)` — Lectura — \"Requiere controlar timestamp, fuente y frescura.\"",
+   "SRC-02-01": "`get_eligible_options(trip_context)` — Lectura — \"Entrega opciones candidatas, no una decisión final.\"",
+   "SRC-02-02": "`get_policy_rules(scenario)` — Lectura — \"Reglas versionadas y verificables.\"",
+   "SRC-02-03": "`create_rebooking_request(option, idempotency_key)` — Escritura — \"Acción de alto impacto.\"",
+   "SRC-02-04": "`create_human_case(reason, evidence)` — Escritura — \"Escalamiento a operación humana.\"",
+   "SRC-02-05": "`notify_passenger(message)` — Escritura — \"No debe enviar información no validada.\"",
+   "SRC-02-06": "\"Estos ejemplos son representativos de lo que devuelven las tools. Úsalos como base de trabajo.\"",
+   "SRC-02-07": "JSON de `get_trip_context(\"ABC123\")` (completo; p. 2)",
+   "SRC-02-08": "JSON de `get_operational_events([\"S1\",\"S2\"])` — inicio: `E-1001`, `E-1007` (continúa en p. 3)",
+   "SRC-03-01": "Continuación de `get_operational_events`: `E-1012`, `E-2003`, `_meta` (con `sources_degraded`)",
+   "SRC-03-02": "JSON de `get_eligible_options(trip_context)` (O1, O2, O3 + `_meta.ttl_seconds`)",
+   "SRC-03-03": "JSON de `get_policy_rules(\"DELAY\")` (R1–R5 + versión + `superseded_versions`)",
+   "SRC-03-04": "`create_rebooking_request` → `201` / `409` / `503` (el comentario \"el resultado real es indeterminado\" cruza a p. 4)",
+   "SRC-04-01": "`503 { \"error\": \"UPSTREAM_TIMEOUT\" } // el resultado real es indeterminado` (p. 3–4)",
+   "SRC-04-02": "`create_human_case` → `201 { case_id, queue, sla_minutes }`",
+   "SRC-04-03": "`notify_passenger` → `202 { notification_id, channel, status }` · `422 { error: \"UNVALIDATED_CONTENT\", detail: \"falta policy_ref\" }`",
+   "SRC-04-04": "\"Los datos operacionales pueden estar desactualizados o ser contradictorios entre fuentes.\"",
+   "SRC-04-05": "\"Una recomendación incorrecta puede generar costo, un reclamo o el incumplimiento de una política.\"",
+   "SRC-04-06": "\"Cambiar una reserva o emitir una compensación son acciones de alto impacto.\"",
+   "SRC-04-07": "\"Deben protegerse los datos personales y aplicarse mínimo privilegio.\"",
+   "SRC-04-08": "\"La primera versión debe poder ser operada por un equipo pequeño.\"",
+   "SRC-04-09": "\"Deben considerarse latencia, costo por interacción y dependencia de modelos.\"",
+   "SRC-04-10": "\"No existe una única solución correcta.\"",
+   "SRC-04-11": "\"El enunciado no las define a propósito. Puedes decidirlas, documentarlas o explicitar qué preguntarías y a quién.\"",
+   "SRC-04-12": "\"Qué se considera una modificación relevante.\"",
+   "SRC-04-13": "\"Qué información puede mostrarse al pasajero y cuál no.\"",
+   "SRC-04-14": "\"En qué casos una recomendación puede entregarse de forma automática.\"",
+   "SRC-04-15": "\"En qué casos debe intervenir una persona antes de actuar o comunicar.\"",
+   "SRC-04-16": "\"Qué hacer cuando las fuentes entregan información contradictoria.\"",
+   "SRC-04-17": "\"Diseña una primera versión acotada del producto. Debes implementar un vertical slice técnico en uno de los dos tracks siguientes — la capa complementaria puedes dejarla como diseño, contrato o pseudo…",
+   "SRC-04-18": "\"implementa la lógica que resuelve el caso base — combinar reserva, eventos y políticas para determinar qué le corresponde al pasajero — como servicio o función invocable, con manejo de errores y al m…",
+   "SRC-04-19": "\"implementa la pantalla o flujo que vería el pasajero, consumiendo datos equivalentes a los que entregarían las tools, mostrando el estado del viaje, la alerta y la recomendación, con al menos una val…",
+   "SRC-04-20": "\"No se espera que domines ambos tracks con la misma profundidad: el requisito es demostrar profundidad en uno y capacidad de diseñar cómo se integra la capa complementaria.\"",
+   "SRC-04-21": "\"Resuelve el caso base. A partir de la información disponible, determina qué ocurrió con el viaje y qué corresponde ofrecer o comunicar al pasajero.\"",
+   "SRC-04-22": "\"Diseña el manejo de una consulta ambigua o compleja en la que el sistema deba combinar reserva, eventos operacionales y políticas para llegar a una respuesta. Explica cómo se descompone el trabajo, q…",
+   "SRC-04-23": "\"Implementa tu vertical slice según el track elegido, y especifica —sin necesidad de implementarla— la capa complementaria: si tu track fue Backend, cómo se vería o comunicaría al pasajero (pantalla, …",
+   "SRC-05-01": "\"No es obligatorio incorporar IA en runtime. Si decides no hacerlo, explica qué beneficio esperabas y por qué el riesgo, el costo o la complejidad no lo justifican. Resolver algo de forma determinísti…",
+   "SRC-05-02": "\"Tu vertical slice del track elegido, más diseño, contrato o pseudocódigo para la capa complementaria. Debe permitir verificar al menos una decisión relevante del caso. Incluye: track elegido (Backend…",
+   "SRC-05-03": "\"README de ingeniería (máx. 2 páginas): problema entendido y outcome esperado; supuestos y alcance; decisiones principales y sus alternativas descartadas; qué quedó determinístico, AI-assisted, agenti…",
+   "SRC-05-04": "\"AI Usage & Decision Note (máx. 1 página): herramientas de IA utilizadas y para qué; outputs aceptados, rechazados o modificados, y cómo los validaste; decisiones que tomaste personalmente; qué inform…",
+   "SRC-05-05": "\"Puedes usar esta tabla para mostrar la clasificación de pasos que pide el README (también puedes incluirla directamente en el README o en tu presentación)\": columnas **Paso · Clasificación · Razón · …",
+   "SRC-05-06": "\"Recibes el desafío → preparas tu propuesta (48 horas) → la entregas en el formato que elijas → presentas durante 10 minutos ante el comité → preguntas, profundización y debate técnico → evaluación.\"",
+   "SRC-05-07": "\"Tienes 48 horas desde que recibes este documento para preparar y enviar tu propuesta. Las 48 horas son el plazo disponible, no 48 horas de trabajo continuo: el trabajo efectivo tiene un máximo de 3 h…",
+   "SRC-06-01": "\"Las 3 horas incluyen el análisis del caso, la implementación, las validaciones y la documentación. El tiempo es un límite, no una meta: no evaluamos cuánto alcanzaste a producir dentro de él.\"",
+   "SRC-06-02": "\"Los tres entregables de la sección 6 son obligatorios en su contenido. Tú eliges el formato y los archivos más adecuados … (por ejemplo, repositorio, Markdown, PDF, documento, diagrama o demo). No ex…",
+   "SRC-06-03": "\"La sesión con el comité se agenda dentro de las 48 horas hábiles siguientes a tu entrega y dura entre 40 y 45 minutos. Comienza con 10 minutos … puedes usar directamente tus entregables y no necesita…",
+   "SRC-06-04": "\"Esta instancia forma parte integral de la evaluación. El comité podrá: preguntar por tus decisiones y cuestionar tus supuestos; explorar alternativas que descartaste y profundizar en trade-offs; plan…",
+   "SRC-06-05": "\"Puedes utilizar libremente LLMs, coding assistants, agentes, búsqueda, scripts, automatizaciones, skills, MCPs y frameworks equivalentes. No evaluamos una herramienta específica ni la cantidad de her…",
+   "SRC-06-06": "\"La evaluación combina tus entregables con tu presentación y la conversación técnica. No se centra únicamente en el resultado final: buscamos comprender cómo interpretas el problema, cómo estructuras …",
+   "SRC-06-07": "\"No existe una única solución correcta. Una solución distinta a la que habríamos elegido no es incorrecta si está bien razonada y es técnicamente consistente. Una solución más compleja no es automátic…",
+   "SRC-07-01": "\"Cómo entiendes y acotas el problema, qué supuestos explicitas, qué resultado priorizas y cómo lo medirías.\"",
+   "SRC-07-02": "\"Coherencia técnica de lo que implementas: contratos, estados, errores, límites e integración con el resto del sistema.\"",
+   "SRC-07-03": "\"Cómo usas IA en tu proceso sin delegar el criterio: qué controles defines, qué verificas y qué aceptas, corriges o rechazas.\"",
+   "SRC-07-04": "\"Qué comprobaciones haces y cómo manejas fallos, permisos, datos sensibles y operación.\"",
+   "SRC-07-05": "\"Si concentras el tiempo en lo importante y dejas evidencia localizable y pendientes explícitos.\"",
+   "SRC-07-06": "\"Cómo comparas alternativas considerando consecuencias, costos, riesgos y reversibilidad.\"",
+   "SRC-07-07": "\"Dónde aporta valor un agente o la IA y dónde conviene lógica determinística o intervención humana; qué contexto, herramientas y permisos usa; dónde se detiene y cómo detectas un output incorrecto.\"",
+   "SRC-07-08": "\"Si asumes el resultado, reconoces límites y revisas tus decisiones ante información nueva durante la conversación.\"",
+   "SRC-07-09": "\"No penalizamos no terminar la capa complementaria al track elegido …, no usar IA en runtime, no usar MCP ni un framework específico, entregar pseudocódigo en una parte no esencial, una interfaz poco …",
+   "SRC-07-10": "\"Si algo del enunciado te resulta insuficiente para avanzar, esa también es información útil: documenta el supuesto que tomaste y por qué. Nos interesa más tu criterio.\""
+  },
+  "pol": {
+   "MATRIZ": "Comparación por tema entre todas las fuentes y las reglas del PDF.",
+   "CRUCE": "Qué política toca qué brecha, requerimiento y decisión.",
+   "LEEME": "Estado de captura de cada fuente y qué país importa para el caso (§3).",
+   "POL-UY-01": "Retraso de 31 min o más y no conforme: cambio sin costo (mismo destino y cabina, 12 meses) o devolución sin cargo.",
+   "POL-UY-02": "Adelanto de 16 min o más: mismas opciones que el retraso.",
+   "POL-UY-03": "Cancelación: alternativa, nueva fecha sin costo o devolución total (incluye tasas).",
+   "POL-CL-00": "Las soluciones valen solo en Chile (vuelos con origen en Chile).",
+   "POL-CL-01": "Atraso en aeropuerto: más de 1 h conectividad; más de 2 h alimentación (y cada 3 h); más de 4 h de noche alojamiento y transporte; más de 11 h de día transporte. Excepto clima, fuerza mayor o caso fortuito.",
+   "POL-CL-02": "Atraso de más de 3 h y decide no volar: devolución de pasaje y tasas.",
+   "POL-CL-03": "Desde 31 min de atraso: cambio (fecha, hora o destino, misma cabina) o devolución.",
+   "POL-CL-04": "Reprogramación o cancelación: reubicación, cambio sin cargo ni diferencia tarifaria, devolución si espera más de 3 h; alojamiento si hay que pernoctar.",
+   "POL-CL-06": "Sobreventa: opciones, devolución en 10 días hábiles y compensación en UF (la tabla tiene una fila anómala).",
+   "POL-CL-07": "Pérdida de conexión en la misma reserva: reubicación, cambio sin cargo ni diferencia tarifaria, devolución si decide no volar.",
+   "POL-CL-13": "Menores de 14 años: asientos contiguos a un adulto de su familia o de la misma reserva.",
+   "POL-CL-16": "Las tasas de embarque siempre son reembolsables; las tarifas baratas no admiten cambio ni devolución voluntaria; se evalúa por segmento.",
+   "POL-PE-01": "Decisión 619 art. 2: aplica a quien inicia su viaje en un país andino, o es transferido allí por el transportista.",
+   "POL-PE-02": "Definiciones: niños menores de 5 años son usuarios con necesidades especiales; valor neto sin tasas ni impuestos.",
+   "POL-PE-03": "Art. 4: informar cambios al menos 4 h antes; información preferentemente escrita de derechos ante retraso, cancelación o sobreventa.",
+   "POL-PE-06": "Art. 7: cancelación; liberación si avisó con 15 días o más; causas no imputables solo si las verifica la autoridad nacional.",
+   "POL-PE-07": "Art. 8: retraso más de 2 h refrigerio y llamada; más de 4 h comida; más de 6 h compensación mínima 25 % y hospedaje o reembolso; cancelación; sobreventa; conexiones.",
+   "POL-PE-09": "Art. 10: atención prioritaria a menores no acompañados y personas con necesidades especiales.",
+   "POL-PE-10": "Art. 11: reembolso dentro de 5 días hábiles.",
+   "POL-PE-16": "Art. 24: no se pueden imponer condiciones inferiores a las de la Decisión.",
+   "POL-CO-02": "Informar cambios por el medio más rápido, a más tardar 24 h antes.",
+   "POL-CO-04": "Demora: más de 1 h refrigerio; más de 3 h comida; más de 5 h compensación de al menos 30 % (no si sale antes de 6 h).",
+   "POL-CO-05": "Cancelación: devolución más compensación de al menos 30 % y hospedaje.",
+   "POL-CO-07": "Adelanto de más de 1 h: devolución o siguiente vuelo.",
+   "POL-UYN-02": "Espera de más de 4 h: comidas, alojamiento y transporte; no aplica por clima.",
+   "POL-UYN-04": "Menores de 5 años, personas con discapacidad o mayores de 70: embarque preferente.",
+   "POL-AR-03": "Demoras: hasta 4 h nada (salvo 00-06 h comidas); 4-8 h comidas; más de 8 h comidas, alojamiento y traslado.",
+   "POL-BO-01": "Avisar cambios al menos 4 h antes (nacional) o 12 h (internacional).",
+   "POL-EC-01": "Ecuador (fuente secundaria): compensación mínima de 25 % del trayecto; las fuentes discrepan en los tramos.",
+   "POL-UE-03": "UE: cancelación; adelanto de más de 1 h se considera cancelación; compensación salvo aviso de 14 días o circunstancias extraordinarias."
+  }
+ }
+}
