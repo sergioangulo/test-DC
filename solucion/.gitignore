@@ -1,0 +1,21 @@
+# Entorno y secretos
+.env
+.env.*
+*.db
+*.sqlite
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+# Node
+node_modules/
+dist/
+# Sistema
+.DS_Store
+Thumbs.db
+*.pdf
+datos_fuente/

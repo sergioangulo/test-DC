@@ -1,0 +1,14 @@
+{
+  "mode": "auto",
+  "reviewer_personality": "pragmatic",
+  "features": {
+    "review_system": "4-agent",
+    "scoring": true,
+    "format_verification": true,
+    "d10_design_phase": true
+  },
+  "project_type": "fullstack",
+  "spec_root": "sdd/specs",
+  "created_at": "2026-10-19T18:05:03Z",
+  "migrated_from": "ninguno: proyecto nuevo"
+}
