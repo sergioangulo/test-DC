@@ -1,0 +1,124 @@
+:root {
+  --bg-page: #f4f6fb;
+  --bg-card: #ffffff;
+  --text-primary: #14192d;
+  --text-secondary: #4a536b;
+  --brand-indigo: #1b0088;
+  --accent-coral: #e8114b;
+  --border-subtle: #dce1ef;
+  --badge-ok-bg: #e6f6ee;
+  --badge-ok-fg: #0b6b3a;
+  --badge-warn-bg: #fff4e0;
+  --badge-warn-fg: #8a4b00;
+  --badge-err-bg: #fde8ee;
+  --badge-err-fg: #a30b37;
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+}
+
+.dev-bar {
+  background: #1e243b;
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dev-bar select {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #4a5578;
+  background: #0f1424;
+  color: #ffffff;
+  font-size: 14px;
+  min-width: 280px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 3px rgba(20, 25, 45, 0.05);
+}
+
+.card h2, .card h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badge-warn { background: var(--badge-warn-bg); color: var(--badge-warn-fg); }
+.badge-ok { background: var(--badge-ok-bg); color: var(--badge-ok-fg); }
+.badge-err { background: var(--badge-err-bg); color: var(--badge-err-fg); }
+
+.grid-two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.segment-box {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 12px;
+  background: #fafbfe;
+}
+
+.btn-primary {
+  width: 100%;
+  min-height: 44px;
+  background: var(--brand-indigo);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 12px 16px;
+}
+
+.btn-primary:hover {
+  opacity: 0.94;
+}
+
+.code-block {
+  background: #121726;
+  color: #d6deeb;
+  padding: 12px;
+  border-radius: var(--radius);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  overflow-x: auto;
+}

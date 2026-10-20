@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Disruption Companion V0 — Centro de Ayuda al Pasajero</title>
+  <style>
+    :root {
+      --bg-page: #f4f6fb;
+      --bg-card: #ffffff;
+      --text-primary: #14192d;
+      --text-secondary: #4a536b;
+      --border-subtle: #dce1ef;
+      --brand-indigo: #1b0088;
+      --badge-warn-bg: #fff4e0;
+      --badge-warn-fg: #8a4b00;
+      --badge-ok-bg: #e6f6ee;
+      --badge-ok-fg: #0b6b3a;
+      --badge-err-bg: #fde8ee;
+      --badge-err-fg: #a30b37;
+      --radius: 10px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg-page); color: var(--text-primary); line-height: 1.5; }
+    .top-stripe { height: 6px; background: linear-gradient(90deg, #1b0088, #e8114b); }
+    .container { max-width: 880px; margin: 0 auto; padding: 18px 16px 44px; }
+    .dev-bar { background: #1e243b; color: #fff; padding: 10px 16px; border-radius: var(--radius); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 13px; }
+    .dev-bar select { padding: 7px 12px; border-radius: 6px; border: 1px solid #4a5578; background: #0f1424; color: #fff; font-size: 13px; min-width: 340px; }
+    .customer-zone { margin-bottom: 28px; }
+    .card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(20,25,45,0.04); }
+    .card h2 { margin: 0 0 6px 0; font-size: 21px; color: #14192d; }
+    .card h3 { margin: 0 0 12px 0; font-size: 17px; color: #1b0088; }
+    .status-pill { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; margin-top: 6px; }
+    .pill-PENDIENTE_APROBACION { background: var(--badge-warn-bg); color: var(--badge-warn-fg); }
+    .pill-AUTOMATICA { background: var(--badge-ok-bg); color: var(--badge-ok-fg); }
+    .pill-BLOQUEADA { background: var(--badge-err-bg); color: var(--badge-err-fg); }
+    .pill-DEFAULT { background: #eef1f8; color: #3b445e; }
+    .grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .segment-box { border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px 14px; background: #fafbfe; font-size: 14px; }
+    .segment-title { font-size: 15px; font-weight: 700; color: #14192d; margin-bottom: 4px; }
+    .segment-status-delayed { color: #a30b37; font-weight: 600; margin-top: 4px; }
+    .segment-status-ok { color: #3b445e; margin-top: 4px; }
+    .gate-highlight { margin-top: 6px; padding: 6px 10px; background: #eef2ff; border-left: 4px solid #1b0088; border-radius: 4px; font-weight: 600; font-size: 13px; }
+    .msg-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+    .msg-item { padding: 10px 14px; border-radius: 8px; background: #f8f9fc; border: 1px solid #e5e9f4; font-size: 15px; }
+    .msg-observacion { background: #fff8eb; border-left: 4px solid #d97706; border-color: #fde68a; font-weight: 600; color: #78350f; }
+    .msg-propuesta { background: #f0f4ff; border-left: 4px solid #1b0088; border-color: #c7d2fe; font-weight: 600; color: #1e1b4b; }
+    .proposal-box { border: 2px solid #1b0088; border-radius: 8px; padding: 14px 16px; background: #f8faff; margin-bottom: 12px; }
+    .proposal-title { font-size: 16px; font-weight: 700; color: #1b0088; margin-bottom: 4px; }
+    .btn-primary { width: 100%; min-height: 46px; background: var(--brand-indigo); color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; padding: 12px 18px; margin-top: 6px; }
+    .btn-primary:hover { opacity: 0.94; }
+    .action-feedback { margin-top: 12px; padding: 12px 16px; border-radius: 8px; background: #e6f6ee; border: 1px solid #a7f3d0; color: #065f46; font-size: 15px; }
+    .debug-zone { background: #e5e7eb; border: 2px dashed #9ca3af; border-radius: var(--radius); padding: 18px 20px; color: #1f2937; }
+    .debug-zone h2 { margin: 0 0 4px 0; font-size: 16px; color: #374151; text-transform: uppercase; letter-spacing: 0.04em; }
+    .debug-subtitle { font-size: 13px; color: #4b5563; margin-bottom: 14px; }
+    .debug-card { background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; font-size: 13px; }
+    .debug-card h4 { margin: 0 0 6px 0; font-size: 14px; color: #111827; }
+    .debug-card ul { margin: 4px 0; padding-left: 18px; }
+    .code-block { background: #111827; color: #e5e7eb; padding: 10px; border-radius: 6px; font-family: Consolas, monospace; font-size: 11px; max-height: 200px; overflow: auto; margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="top-stripe"></div>
+  <main class="container">
+    <section class="dev-bar">
+      <div><strong>Simulador de Escenarios (Selector de Prueba)</strong></div>
+      <select id="scenarioSelect"></select>
+    </section>
+    <div id="content">Consultando el estado de tu viaje...</div>
+  </main>
+  <script>
+    const FRIENDLY_STATE = {
+      PENDIENTE_APROBACION: "Tienes una sugerencia pendiente de aprobación",
+      AUTOMATICA: "Tienes una opción de cambio disponible sin costo",
+      BLOQUEADA: "Tu viaje requiere la atención de uno de nuestros ejecutivos",
+      INFORMATIVA: "Información actualizada de tu viaje"
+    };
+
+    function formatSegmentStatus(s) {
+      if (s.state === "DELAYED") {
+        return `<div class="segment-status-delayed">Retrasado ${s.delay_minutes} min · Nueva hora de salida: ${s.new_departure}</div>`;
+      }
+      if (s.state === "CONFLICT") {
+        return `<div class="segment-status-delayed">Estado en verificación por nuestro equipo</div>`;
+      }
+      if (s.state === "NO_VERIFIED_INFO") {
+        return `<div class="segment-status-ok">Sin información verificada en este momento (horario programado: ${s.scheduled_departure})</div>`;
+      }
+      return `<div class="segment-status-ok">Horario programado (salida ${s.scheduled_departure})</div>`;
+    }
+
+    function formatCustomerMessage(m) {
+      let cleanText = m.text.replace(/^Estimación:\s*/i, "");
+      if (m.kind === "ESTIMATE") {
+        return `<li class="msg-item msg-observacion">Observación: ${cleanText}</li>`;
+      }
+      if (m.kind === "NEXT_STEP") {
+        return `<li class="msg-item msg-propuesta">${cleanText}</li>`;
+      }
+      return `<li class="msg-item">${cleanText}</li>`;
+    }
+
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const requested = params.get("scenario");
+      if (requested) {
+        await fetch("/api/dev/scenario", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ scenario_id: requested })
+        });
+      }
+      const sRes = await fetch("/api/dev/scenarios").then(r => r.json());
+      const sel = document.getElementById("scenarioSelect");
+      sel.innerHTML = sRes.scenarios.map(s =>
+        `<option value="${s.scenario_id}" ${s.scenario_id === sRes.active_scenario_id ? "selected" : ""}>${s.scenario_id} — ${s.title}</option>`
+      ).join("");
+      sel.onchange = async (e) => {
+        await fetch("/api/dev/scenario", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ scenario_id: e.target.value })
+        });
+        await loadView(false);
+      };
+      await loadView(params.get("autoAccept") === "1");
+    }
+
+    async function loadView(autoAccept) {
+      const view = await fetch("/api/v1/trips/ABC123/evaluate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ caller: "user" })
+      }).then(r => r.json());
+      renderView(view, null);
+      if (autoAccept && view.actions && view.actions.length > 0) {
+        await triggerAccept(view, view.actions[0]);
+      }
+    }
+
+    async function triggerAccept(view, act) {
+      const optId = act.option_id || "O1";
+      const res = await fetch(`/api/v1/trips/${view.booking_id}/options/${optId}/accept`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision_id: view.decision_id })
+      }).then(r => r.json());
+      renderView(view, res);
+    }
+
+    function renderView(view, actionResult) {
+      const stateKey = view.decision_state || "DEFAULT";
+      const friendlyBanner = FRIENDLY_STATE[view.decision_state] || "Tu viaje se encuentra según lo programado";
+      const greeting = view.holder_first_name ? `Hola, ${view.holder_first_name}` : "Hola";
+
+      const segsCustomerHtml = view.segments.map(s => `
+        <div class="segment-box">
+          <div class="segment-title">Vuelo ${s.flight_number} (${s.origin} → ${s.destination})</div>
+          <div>Fecha: ${s.date} · Salida programada: ${s.scheduled_departure} · Llegada programada: ${s.scheduled_arrival}</div>
+          ${formatSegmentStatus(s)}
+          ${s.gate ? `<div class="gate-highlight">Puerta de embarque ${s.gate} · Confirma siempre en las pantallas del aeropuerto</div>` : ""}
+        </div>
+      `).join("");
+
+      const customerMessages = view.messages.filter(m => m.message_id !== "MSG_GATE");
+      const msgsCustomerHtml = customerMessages.length
+        ? `<ul class="msg-list">${customerMessages.map(formatCustomerMessage).join("")}</ul>`
+        : `<p style="margin:0; color:#4a536b;">No encontramos novedades que afecten tu itinerario en este momento.</p>`;
+
+      const proposedOpt = view.options && view.options.length > 0 ? view.options[0] : null;
+      const proposalCardHtml = proposedOpt ? `
+        <div class="proposal-box">
+          <div class="proposal-title">Te proponemos: Cambiar tu vuelo a ${proposedOpt.flight_number} (${proposedOpt.origin} → ${proposedOpt.destination})</div>
+          <div>Salida: <strong>${proposedOpt.date} a las ${proposedOpt.departure}</strong> · <strong>Sin costo adicional</strong> · ${proposedOpt.seats_available} asientos disponibles para tu grupo</div>
+        </div>
+      ` : "";
+
+      const actButtonsHtml = view.actions.map((a, idx) =>
+        `<button class="btn-primary" id="actionBtn${idx}">${a.label}</button>`
+      ).join("");
+
+      const customerActionResultHtml = actionResult ? `
+        <div class="action-feedback">
+          <strong>Solicitud procesada:</strong> ${actionResult.message?.text || ""}
+          ${actionResult.operation ? `<div>Código de seguimiento: <strong>${actionResult.operation.request_id}</strong></div>` : ""}
+          ${actionResult.human_case ? `<div>Código de caso con nuestro equipo: <strong>${actionResult.human_case.case_id}</strong> (tiempo estimado de atención: ${actionResult.human_case.sla_minutes} min)</div>` : ""}
+        </div>
+      ` : "";
+
+      const decisionSectionHtml = (proposedOpt || view.actions.length > 0) ? `
+        <section class="card">
+          <h3>Opciones y siguiente paso para tu viaje</h3>
+          ${proposalCardHtml}
+          ${actButtonsHtml}
+          ${customerActionResultHtml}
+        </section>
+      ` : "";
+
+      // Panel Gris de Soporte / Debug Operacional
+      const varsDebugHtml = view.derived_variables.map(v =>
+        `<li><code>${v.name}</code> = <strong>${String(v.value)}</strong> (origen: ${v.origin})</li>`
+      ).join("");
+
+      const rulesDebugHtml = view.policy ? view.policy.rules.map(r =>
+        `<li><code>${r.rule_id}</code>: <code>${r.condition}</code> → <strong>${r.result}</strong> (requires_human_approval: <code>${r.requires_human_approval}</code>, derechos: <code>${(r.entitlements || []).join(", ")}</code>)</li>`
+      ).join("") : "<li>Política no consultada (bloqueo previo o sin retraso).</li>";
+
+      const viableDebugHtml = view.options.map(o =>
+        `<li><code>${o.option_id}</code> (${o.flight_number} ${o.date} ${o.departure}) — Viable · <code>policy_ref: ${o.policy_ref}</code> · asientos: ${o.seats_available} · costo: ${o.fare_difference} ${o.currency || ""}</li>`
+      ).join("") || "<li>Ninguna opción viable</li>";
+
+      const discDebugHtml = view.discarded_options.map(o =>
+        `<li><code>${o.option_id}</code> (${o.type}) — Descartada por: <code>${o.discard_reasons.join(", ")}</code> · <code>policy_ref: ${o.policy_ref}</code></li>`
+      ).join("") || "<li>Ninguna</li>";
+
+      const rawMsgsDebugHtml = view.messages.map(m =>
+        `<li><code>[${m.kind}]</code> (${m.message_id}) ${m.text} · <code>policy_ref: ${m.policy_ref || "null"}</code> · <code>evidence: ${(m.evidence_refs || []).join(", ")}</code></li>`
+      ).join("");
+
+      document.getElementById("content").innerHTML = `
+        <div class="customer-zone" aria-label="Vista del Pasajero">
+          <section class="card">
+            <h2>${greeting}</h2>
+            <div style="color:#4a536b; font-size:15px;">Reserva <strong>${view.booking_id}</strong> · ${view.passenger_count} pasajeros</div>
+            <div class="status-pill pill-${stateKey}">${friendlyBanner}</div>
+          </section>
+
+          <section class="card">
+            <h3>Estado de tu viaje</h3>
+            <div class="grid-two">${segsCustomerHtml}</div>
+          </section>
+
+          <section class="card">
+            <h3>Qué ocurrió con tu viaje</h3>
+            ${msgsCustomerHtml}
+          </section>
+
+          ${decisionSectionHtml}
+        </div>
+
+        <aside class="debug-zone" aria-label="Información Operacional y de Soporte (Debug)">
+          <h2>Información Operacional, Soporte y Trazabilidad (Debug Interno)</h2>
+          <div class="debug-subtitle">Esta sección gris contiene los metadatos técnicos, reglas activadas, referencias de política y opciones descartadas para soporte e ingeniería (no se muestra al pasajero).</div>
+
+          <div class="debug-card">
+            <h4>1. Metadatos de Decisión, Completitud y Eventos</h4>
+            <div><strong>decision_id:</strong> <code>${view.decision_id}</code> · <strong>decision_state:</strong> <code>${view.decision_state || "null"}</code> · <strong>completeness:</strong> <code>${view.completeness}</code> (missing: <code>${(view.missing_fields || []).join(", ") || "ninguno"}</code>)</div>
+            <div><strong>Eventos elegidos:</strong> <code>${JSON.stringify(view.chosen_events)}</code></div>
+            <div><strong>Eventos descartados:</strong> <code>${JSON.stringify(view.discarded_events)}</code> · <strong>Bloqueos:</strong> <code>${(view.blocking_reasons || []).join(", ") || "ninguno"}</code></div>
+          </div>
+
+          <div class="debug-card">
+            <h4>2. Variables Derivadas y Reglas de Política Evaluadas (${view.policy ? view.policy.version : "Sin política"})</h4>
+            <div class="grid-two">
+              <div><strong>Variables derivadas:</strong><ul>${varsDebugHtml}</ul></div>
+              <div><strong>Reglas activadas / evaluadas:</strong><ul>${rulesDebugHtml}</ul></div>
+            </div>
+          </div>
+
+          <div class="debug-card">
+            <h4>3. Auditoría de Opciones (Viables y Descartadas) y Mensajes Técnicos</h4>
+            <div><strong>Opciones viables:</strong><ul>${viableDebugHtml}</ul></div>
+            <div><strong>Opciones descartadas (soporte):</strong><ul>${discDebugHtml}</ul></div>
+            <div><strong>Mensajes con etiquetas técnicas y policy_ref:</strong><ul>${rawMsgsDebugHtml}</ul></div>
+          </div>
+
+          <div class="debug-card">
+            <h4>4. Payload JSON Completo del Backend</h4>
+            <pre class="code-block">${JSON.stringify({ view, actionResult }, null, 2)}</pre>
+          </div>
+        </aside>
+      `;
+
+      view.actions.forEach((a, idx) => {
+        const btn = document.getElementById(`actionBtn${idx}`);
+        if (btn) btn.onclick = () => triggerAccept(view, a);
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
