@@ -1,0 +1,17 @@
+services:
+  - name: backend-api
+    mode: local
+    runtime: python-3.13
+    port: 8000
+    command: uvicorn app.api.main:app --host 127.0.0.1 --port 8000
+  - name: frontend-viewer
+    mode: local
+    runtime: node-vite
+    port: 5173
+    command: npm run dev
+  - name: external-tools
+    mode: mock
+    impl: backend.app.adapters.mock_tools.MockToolsAdapter
+  - name: decision-store
+    mode: mock
+    impl: in-memory
